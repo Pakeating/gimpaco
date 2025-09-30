@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Login from '../components/Login.astro';
+import Register from '../components/Register.astro';
+---
+
+<Layout>
+  <div class="auth-page-container">
+    <Login />
+    <div id="register-component-wrapper" style="display: none;">
+      <Register />
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const setupAuthToggle = () => {
+    const loginContainer = document.getElementById('login-container');
+    const registerWrapper = document.getElementById('register-component-wrapper');
+    const showRegisterBtn = loginContainer?.querySelector('#show-register-btn');
+    const showLoginBtn = registerWrapper?.querySelector('#show-login-btn');
+
+    if (loginContainer && registerWrapper && showRegisterBtn && showLoginBtn) {
+      showRegisterBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loginContainer.style.display = 'none';
+        registerWrapper.style.display = 'block';
+      });
+
+      showLoginBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        registerWrapper.style.display = 'none';
+        loginContainer.style.display = 'block';
+      });
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', setupAuthToggle);
+  } else {
+    setupAuthToggle();
+  }
+</script>
+
+<style is:global>
+
+  .auth-page-container {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; background-color: var(--secondary-color, #F5F5F5); padding: 2rem;
+  }
+
+  .auth-card {
+      background-color: var(--white-color, #FFFFFF); padding: 2.5rem 3rem; border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%; max-width: 28rem; text-align: center;
+  }
+
+  .auth-title {
+      font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 700;
+      color: var(--primary-color, #2A2A2A); margin-bottom: 0.5rem;
+  }
+
+  .auth-subtitle {
+      font-family: 'Lato', sans-serif; font-size: 1rem; color: var(--primary-color, #2A2A2A);
+      opacity: 0.8; margin-bottom: 2rem;
+  }
+
+  .login-google {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem;
+      width: 100%; padding: 0.8rem 1rem; background-color: #FFFFFF; color: #333;
+      font-family: 'Lato', sans-serif; font-weight: 500; font-size: 16px;
+      border: 1px solid #ddd; border-radius: 0.5rem; cursor: pointer; 
+      transition: background-color 0.2s, box-shadow 0.2s;
+  }
+  .login-google:hover { background-color: #f7fafc !important; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.25); }
+  .google-logo { width: 20px; height: 20px; }
+
+  .separator {
+      text-align: center; margin: 1.5rem 0; font-weight: 500;
+      font-size: 0.9rem; color: #aaa; font-family: 'Lato', sans-serif;
+  }
+
+  .auth-form .input-group { margin-bottom: 1.25rem; text-align: left; }
+
+  .auth-form label {
+      display: block; font-weight: 600; margin-bottom: 0.5rem;
+      color: var(--primary-color, #2A2A2A); font-family: 'Lato', sans-serif; font-size: 0.9rem;
+  }
+
+  .auth-form input {
+      width: 100%; padding: 0.8rem 1rem; border: 1px solid #D1D5DB; border-radius: 0.5rem;
+      font-size: 1rem; font-family: 'Lato', sans-serif; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .auth-form input:focus { outline: none; border-color: var(--accent-color, #008080); box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3); }
+
+  .loading-button {
+      margin-top: 1.5rem;
+  }
+
+  .auth-switch { margin-top: 2rem; }
+  .auth-switch p { font-family: 'Lato', sans-serif; font-size: 0.9rem; }
+  .auth-switch .switch-link {
+      background: none; border: none; padding: 0; font: inherit;
+      color: var(--accent-color, #008080); font-weight: 600; cursor: pointer;
+  }
+  .auth-switch .switch-link:hover { text-decoration: underline; }
+
+  .error-message {
+      display: none; color: #991B1B; background-color: #FEE2E2; border: 1px solid #FCA5A5;
+      padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
+      font-family: 'Lato', sans-serif; font-size: 0.9rem; text-align: left;
+  }
+</style>

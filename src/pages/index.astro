@@ -1,16 +1,146 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
+import PendingWorkout from '../components/pending-workout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <div class="welcome-container">
+    <header class="welcome-header">
+      <h1>Bienvenido a Gimpaco</h1>
+      <p>¿Como quieres ponerte en forma hoy?</p>
+    </header>
+
+    <main class="action-cards">
+      <a href="/new-workout" class="card begin-workout">
+        <div class="card-content">
+          <PendingWorkout />
+          <h2 class="workout-title">Comenzar Entrenamiento</h2>
+          <p>Inicia una nueva sesión de entrenamiento y registra tus ejercicios.</p>
+        </div>
+      </a>
+      
+      <a href="/history" class="card review-history">
+        <div class="card-content">
+          <h2>Revisar Entrenamientos Anteriores</h2>
+          <p>Consulta tu historial de entrenamientos y sigue tu progreso.</p>
+        </div>
+      </a>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .welcome-container {
+    max-width: 64rem;
+    margin: 4rem auto;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .welcome-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-header p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.125rem;
+    color: var(--primary-color);
+    opacity: 0.9;
+    max-width: 40rem;
+    margin: 0 auto 3rem auto;
+  }
+
+  .action-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .action-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .card {
+    background: var(--white-color);
+    border-radius: 0.75rem;
+    padding: 2.5rem;
+    text-decoration: none;
+    color: var(--primary-color);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: visible; 
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15), 0 0 20px 5px rgba(0, 128, 128, 0.3);
+  }
+
+  .begin-workout {
+    align-content: start;
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .card-content h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    color: var(--primary-color);
+  }
+
+  .workout-title {
+    margin-top: 1rem !important;
+  }
+
+  .card-content p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  .begin-workout::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background-color: var(--accent-color);
+    opacity: 0.1;
+    border-radius: 50%;
+    transition: opacity 0.3s ease;
+  }
+
+  .review-history::before {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -50px;
+    width: 150px;
+    height: 150px;
+    background-color: var(--primary-color);
+    opacity: 0.05;
+    border-radius: 50%;
+    transition: opacity 0.3s ease;
+  }
+
+  .card:hover::before {
+    opacity: 0.15;
+  }
+</style>

@@ -1,0 +1,86 @@
+---
+import Navbar from '../components/Navbar.astro';
+import '../styles/global.css';
+
+const manifest = {
+  name: 'Gimpaco',
+  short_name: 'Gimpaco',
+  description: 'Una app para registrar tus entrenamientos y seguir tu progreso.',
+  start_url: '/',
+  display: 'standalone',
+  scope: '/',
+  theme_color: '#F5F5F5',
+  background_color: '#F5F5F5',
+  icons: [
+    { src: '/icons/icon192.webp', sizes: '192x192', type: 'image/webp' },
+    { src: '/icons/icon500.webp', sizes: '500x500', type: 'image/webp', purpose: 'any maskable' }
+  ]
+};
+const siteUrl = Astro.url.origin;
+const manifestWithAbsoluteUrls = {
+  ...manifest,
+  start_url: `${siteUrl}${manifest.start_url}`,
+  scope: `${siteUrl}${manifest.scope}`,
+  icons: manifest.icons.map(icon => ({ ...icon, src: `${siteUrl}${icon.src}` }))
+};
+const encodedManifest = JSON.stringify(manifestWithAbsoluteUrls).replace(/#/g, '%23');
+---
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/webp" href="/favicon.webp" />
+    <link rel="apple-touch-icon" href="/icons/icon192.webp">
+		<meta name="generator" content={Astro.generator} />
+		<title>Gimpaco</title>
+    <link rel="manifest" href={`data:application/manifest+json,${encodedManifest}`} />
+    <meta name="theme-color" content={manifest.theme_color} />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+      body.unverified {
+        display: none;
+      }
+    </style>
+	</head>
+	<body class="unverified">
+    <!-- La Navbar solo se muestra si la página no es la de login -->
+    {Astro.url.pathname !== '/loginPage' && <Navbar />}
+		<slot />
+
+    <script>
+      import { onAuthStateChanged } from "firebase/auth";
+      import { auth } from "../firebase/config";
+
+      const currentPath = window.location.pathname;
+      const isAuthPage = currentPath === '/loginPage';
+
+    //   DEJAMOS ESTO COMENTADO PARA FACILITAR EL PROCESO DE PRUEBAS
+    // const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //     if (user) {
+    //       // USUARIO AUTENTICADO:
+    //         if (isAuthPage) {
+    //         window.location.href = '/';
+    //       }
+    //     } else {
+    //       // USUARIO NO AUTENTICADO:
+    //       if (!isAuthPage) {
+    //         window.location.href = '/loginPage';
+    //       }
+    //     }
+
+    //     // Una vez que tenemos el estado de autenticación, mostramos el contenido de la página.
+        document.body.classList.remove('unverified');
+        
+    //     // Cancelamos la suscripción para que esta lógica solo se ejecute una vez por carga de página.
+    //     unsubscribe();
+        
+    //   });
+    </script>
+	</body>
+</html>

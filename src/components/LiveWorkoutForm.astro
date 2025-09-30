@@ -1,0 +1,206 @@
+---
+
+---
+
+<form class="live-workout-form">
+  <!-- El contenido se generará dinámicamente aquí -->
+  <div id="live-exercises-container"></div>
+  <button type="submit" class="finish-workout-btn">Finalizar Entrenamiento</button>
+</form>
+
+<!-- ========= TODO: TEMPORAL MIENTRAS SE PREPARA EL BACK | TEMPLATES PARA LA GENERACIÓN DINÁMICA ========= -->
+<template id="exercise-group-template">
+  <fieldset class="exercise-group">
+    <legend class="exercise-name"></legend>
+    <div class="sets-grid-header">
+      <span>Serie</span>
+      <span>Objetivo</span>
+      <span>Reps Realizadas</span>
+      <span>Peso (kg)</span>
+      <span>Hecho</span>
+    </div>
+    <div class="sets-container">
+      <!-- Las filas de series se insertarán aquí -->
+    </div>
+  </fieldset>
+</template>
+
+<template id="set-row-template">
+  <div class="set-row">
+    <span class="set-number"></span>
+    <span class="set-target"></span>
+    <input type="number" class="performance-input reps-input" placeholder="Reps" />
+    <input type="number" class="performance-input weight-input" placeholder="kg" />
+    <div class="set-status">
+      <button type="button" class="complete-set-btn">✓</button>
+    </div>
+  </div>
+</template>
+<!-- ========================================================== -->
+
+<style>
+
+  .live-workout-form {
+    background-color: var(--white-color);
+    padding: 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  }
+
+  .exercise-group {
+    border: none;
+    padding: 0;
+    margin: 0 0 3rem 0;
+  }
+  .exercise-group:last-of-type {
+    margin-bottom: 2rem;
+  }
+
+  .exercise-group legend {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem; /* 28px */
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    width: 100%;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .sets-grid-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 1fr 70px;
+    gap: 1rem;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    opacity: 0.6;
+    padding: 0 0.5rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 1fr 70px;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s ease, opacity 0.4s ease;
+  }
+
+  .set-number, .set-target {
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+  }
+  .set-number {
+    font-weight: 700;
+  }
+
+  .performance-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.375rem; /* 6px */
+  }
+
+  .set-status {
+    text-align: center;
+  }
+
+  .complete-set-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background-color: #f9f9f9;
+    color: #ccc;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .set-row.completed .complete-set-btn {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--white-color);
+  }
+  
+  .set-row.completed {
+    background-color: #f7fdfd;
+    opacity: 0.7;
+  }
+
+  .finish-workout-btn {
+    display: block;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--white-color);
+    background-image: linear-gradient(45deg, var(--accent-color), #009688);
+    border: none;
+    border-radius: 999px;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4);
+  }
+
+  .finish-workout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const dataScript = document.getElementById('routine-data');
+    const container = document.getElementById('live-exercises-container');
+    const exerciseTemplate = document.getElementById('exercise-group-template');
+    const setTemplate = document.getElementById('set-row-template');
+
+    if (!dataScript || !container || !exerciseTemplate || !setTemplate) return;
+
+    // Leer y parsear los datos de la "isla"
+    const routine = JSON.parse(dataScript.textContent);
+
+    // Generar el HTML dinámicamente
+    routine.exercises.forEach(exercise => {
+      // Clonar el template para el grupo de ejercicio
+      const exerciseFragment = exerciseTemplate.content.cloneNode(true);
+      exerciseFragment.querySelector('.exercise-name').textContent = exercise.name;
+      const setsContainer = exerciseFragment.querySelector('.sets-container');
+
+
+      exercise.sets.forEach((set, index) => {
+
+        const setFragment = setTemplate.content.cloneNode(true);
+        const setRow = setFragment.querySelector('.set-row');
+        setRow.dataset.setId = set.id; 
+
+        setFragment.querySelector('.set-number').textContent = index + 1;
+        setFragment.querySelector('.set-target').textContent = `${set.targetReps} reps @ ${set.targetWeight}kg`;
+        setFragment.querySelector('.reps-input').name = `reps-${set.id}`;
+        setFragment.querySelector('.weight-input').name = `weight-${set.id}`;
+
+        setsContainer.appendChild(setFragment);
+      });
+
+      container.appendChild(exerciseFragment);
+    });
+
+    container.addEventListener('click', (e) => {
+      if (e.target.classList.contains('complete-set-btn')) {
+        const setRow = e.target.closest('.set-row');
+        setRow.classList.toggle('completed');
+      }
+    });
+  });
+</script>

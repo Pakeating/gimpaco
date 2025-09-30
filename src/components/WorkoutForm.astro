@@ -1,0 +1,163 @@
+---
+
+---
+
+<form class="workout-form">
+  <div class="form-group workout-name-group">
+    <label for="workout-name">Nombre del Entrenamiento</label>
+    <input type="text" id="workout-name" placeholder="Ej: Lunes - Pecho y Tríceps">
+  </div>
+
+  <fieldset class="exercises-fieldset">
+    <legend>Ejercicios</legend>
+    <div id="exercises-list">
+
+    </div>
+    <button type="button" id="add-exercise-btn" class="add-btn">+ Añadir Ejercicio</button>
+  </fieldset>
+
+  <button type="submit" class="save-workout-btn">Guardar Entrenamiento</button>
+</form>
+
+<!-- Template para una nueva fila de ejercicio. Es invisible y se usa para clonar. -->
+<template id="exercise-row-template">
+  <div class="exercise-row">
+    <input type="text" name="exercise-name" placeholder="Nombre del Ejercicio">
+    <input type="number" name="sets" placeholder="Series">
+    <input type="number" name="reps" placeholder="Reps">
+    <input type="number" name="weight" placeholder="Peso (kg)">
+    <button type="button" class="remove-exercise-btn">&times;</button>
+  </div>
+</template>
+
+<style>
+
+  .workout-form {
+    background-color: var(--white-color);
+    padding: 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    text-align: left;
+  }
+
+  .form-group, .exercises-fieldset {
+    margin-bottom: 2rem;
+  }
+
+  label, legend {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2);
+  }
+
+  .exercises-fieldset {
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .exercise-row {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .exercise-row:only-child .remove-exercise-btn {
+      display: none;
+  }
+
+  .remove-exercise-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.75rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+
+  .remove-exercise-btn:hover {
+    color: #ff4d4d;
+  }
+
+  .add-btn, .save-workout-btn {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--white-color);
+    border: none;
+    border-radius: 999px;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .add-btn {
+    background-color: var(--primary-color-light);
+    color: var(--primary-color);
+  }
+
+  .add-btn:hover {
+    background-color: #d0e0e0;
+  }
+
+  .save-workout-btn {
+    background-image: linear-gradient(45deg, var(--accent-color), #009688);
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    font-size: 1.125rem;
+    box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4);
+  }
+
+  .save-workout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const addExerciseBtn = document.getElementById('add-exercise-btn');
+    const exercisesList = document.getElementById('exercises-list');
+    const exerciseRowTemplate = document.getElementById('exercise-row-template');
+
+    const addExerciseRow = () => {
+      const templateContent = exerciseRowTemplate.content.cloneNode(true);
+      exercisesList.appendChild(templateContent);
+    };
+
+    // Añadir la primera fila de ejercicio al cargar la página
+    addExerciseRow();
+
+
+    addExerciseBtn.addEventListener('click', addExerciseRow);
+    exercisesList.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('remove-exercise-btn')) {
+        e.target.closest('.exercise-row').remove();
+      }
+    });
+  });
+</script>

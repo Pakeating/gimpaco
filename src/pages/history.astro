@@ -1,0 +1,87 @@
+---
+import Layout from '../layouts/Layout.astro';
+import WorkoutHistoryItem from '../components/WorkoutHistoryItem.astro';
+
+// Simulación de datos del historial
+const workoutHistory = [
+  {
+    id: 'workout-1',
+    date: '2024-07-28',
+    name: 'Lunes - Pecho y Tríceps',
+    exercises: [
+      { name: 'Press de Banca', sets: 4, reps: 8, weight: 80 },
+      { name: 'Aperturas con Mancuernas', sets: 3, reps: 12, weight: 20 },
+      { name: 'Fondos en Paralelas', sets: 3, reps: 10, weight: 0 },
+    ]
+  },
+  {
+    id: 'workout-2',
+    date: '2024-07-26',
+    name: 'Viernes - Pierna',
+    exercises: [
+      { name: 'Sentadillas', sets: 5, reps: 5, weight: 120 },
+      { name: 'Prensa de Piernas', sets: 4, reps: 10, weight: 180 },
+      { name: 'Extensiones de Cuádriceps', sets: 3, reps: 15, weight: 60 },
+    ]
+  },
+  {
+    id: 'workout-3',
+    date: '2024-07-24',
+    name: 'Miércoles - Espalda y Bíceps',
+    exercises: [
+      { name: 'Dominadas', sets: 4, reps: 8, weight: 0 },
+      { name: 'Remo con Barra', sets: 4, reps: 8, weight: 70 },
+      { name: 'Curl de Bíceps', sets: 3, reps: 12, weight: 15 },
+    ]
+  }
+];
+---
+
+<Layout>
+  <div class="history-container">
+    <header class="history-header">
+      <h1>Historial de Entrenamientos</h1>
+      <p>Consulta tus sesiones pasadas para ver tu progreso a lo largo del tiempo.</p>
+    </header>
+
+    <div class="history-list">
+      {workoutHistory.map(workout => (
+        <WorkoutHistoryItem workout={workout} />
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .history-container {
+    max-width: 60rem;
+    margin: 4rem auto;
+    padding: 2rem;
+  }
+
+  .history-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .history-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .history-header p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.125rem;
+    color: var(--primary-color);
+    opacity: 0.9;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+</style>

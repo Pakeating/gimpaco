@@ -1,0 +1,56 @@
+---
+const { text, id } = Astro.props;
+---
+
+<div class="loading-button" id={id}>
+  <button type="submit" class="main-action-btn">
+    <div class="spinner" style="display: none;"></div>
+    <span class="button-text">{text}</span>
+  </button>
+</div>
+
+<style>
+
+  .loading-button .main-action-btn {
+    position: relative;
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 0.8rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--white-color);
+    cursor: pointer;
+    background-image: linear-gradient(45deg, var(--accent-color), #009688);
+    box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+
+  .loading-button .main-action-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5);
+  }
+
+  .loading-button .main-action-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .main-action-btn .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-top-color: var(--white-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+</style>

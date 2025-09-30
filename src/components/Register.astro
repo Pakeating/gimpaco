@@ -1,0 +1,120 @@
+---
+import LoadingButton from './LoadingButton.astro';
+---
+
+<div id="register-container" class="auth-container">
+    <div class="auth-card">
+        <h2 class="auth-title">Crear una Cuenta</h2>
+        <p class="auth-subtitle">Elige tu método de registro preferido.</p>
+
+        <div id="google-signup-container">
+            <button id="register-google" class="login-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="google-logo" />
+                <span>Continuar con Google</span>
+            </button>
+        </div>
+
+        <div class="separator">o regístrate con tu email</div>
+
+        <form id="register-form" class="auth-form">
+            <div class="input-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" name="email" required autocomplete="email">
+            </div>
+            <div class="input-group">
+                <label for="register-password">Contraseña (mín. 6 caracteres)</label>
+                <input type="password" id="register-password" name="password" required autocomplete="new-password" minlength="6">
+            </div>
+            <div class="input-group">
+                <label for="register-password-confirm">Confirmar Contraseña</label>
+                <input type="password" id="register-password-confirm" name="password-confirm" required autocomplete="new-password" minlength="6">
+            </div>
+            
+            <div id="register-error" class="error-message"></div>
+
+            <LoadingButton id="register-submit-btn" text="Crear Cuenta con Email" />
+        </form>
+
+        <div class="auth-switch">
+            <p>¿Ya tienes una cuenta? <button id="show-login-btn" type="button" class="switch-link">Inicia Sesión</button></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence } from "firebase/auth";
+    import { auth } from "../firebase/config";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const registerContainer = document.getElementById('register-container');
+        if (!registerContainer) return;
+
+        const form = registerContainer.querySelector('#register-form');
+        const googleButton = registerContainer.querySelector('#register-google');
+        const errorContainer = registerContainer.querySelector('#register-error');
+        const submitButton = registerContainer.querySelector('#register-submit-btn button');
+        const spinner = submitButton?.querySelector('.spinner');
+        const buttonText = submitButton?.querySelector('.button-text');
+        
+        if (!form || !googleButton || !errorContainer || !submitButton || !spinner || !buttonText) return;
+
+        // --- Registro con Google ---
+        googleButton.addEventListener('click', async () => {
+            showLoading(true);
+            const provider = new GoogleAuthProvider();
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithPopup(auth, provider);
+                window.location.href = '/';
+            } catch (error) {
+                showError('No se pudo completar el registro con Google.');
+                console.error("Error durante el registro/inicio de sesión con Google:", error);
+            }
+        });
+
+        // --- Registro con Email y Contraseña ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = form.elements.email.value;
+            const password = form.elements.password.value;
+            const confirmPassword = form.elements['password-confirm'].value;
+
+            if (password !== confirmPassword) {
+                showError('Las contraseñas no coinciden.');
+                return;
+            }
+            showLoading(true);
+
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await createUserWithEmailAndPassword(auth, email, password);
+                window.location.href = '/';
+            } catch (error) {
+                let msg = 'Ocurrió un error al registrarse.';
+                if (error.code === 'auth/email-already-in-use') msg = 'El correo electrónico ya está en uso.';
+                if (error.code === 'auth/weak-password') msg = 'La contraseña debe tener al menos 6 caracteres.';
+                showError(msg);
+            }
+        });
+
+        function showLoading(isLoading) {
+            errorContainer.style.display = 'none';
+            submitButton.disabled = isLoading;
+            googleButton.disabled = isLoading;
+
+            if (isLoading) {
+                spinner.style.display = 'block';
+                buttonText.style.display = 'none';
+            } else {
+                spinner.style.display = 'none';
+                buttonText.style.display = 'block';
+            }
+        }
+
+        function showError(message) {
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+            showLoading(false);
+        }
+    });
+</script>
