@@ -1,0 +1,218 @@
+---
+// This line is crucial! It tells Astro to render this page on the server for each request,
+// instead of trying to build it statically at build time.
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+
+// Get the workout ID from the URL
+const { id } = Astro.params;
+
+// Fetch the specific workout data from our API
+const response = await fetch(`${Astro.url.origin}/api/retrieve-workout?id=${id}`);
+const workout = await response.json();
+
+// Handle case where workout is not found
+if (!workout || response.status === 404) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title={`Entrenando: ${workout.name}`}>
+  <main class="container">
+    <div class="workout-header" transition:name={`workout-name-${workout.id}`}>
+      <h1>{workout.name}</h1>
+      <p>Concéntrate, mantén la técnica y supera tus límites.</p>
+    </div>
+
+    <div class="exercises-container">
+      {workout.exercises.map((exercise, index) => (
+        <section class="exercise-card">
+          <div class="exercise-card-header">
+            <span class="exercise-number">{index + 1}</span>
+            <h2>{exercise.name}</h2>
+          </div>
+          <div class="sets-table">
+            <div class="table-header">
+              <div class="header-item">Set</div>
+              <div class="header-item">Planificado</div>
+              <div class="header-item">Realizado</div>
+            </div>
+            {exercise.sets.map((set, setIndex) => (
+              <div class="set-row">
+                <div class="set-cell set-number-cell">{setIndex + 1}</div>
+                <div class="set-cell planned-cell">
+                  <span>{set.repetitions} reps</span>
+                  <span>@ {set.intensity}</span>
+                  {set.weight_kg && <span>{set.weight_kg} kg</span>}
+                </div>
+                <div class="set-cell performed-cell">
+                  <span>aqui iran los datos del usuario</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <div class="finish-workout-section">
+      <button class="finish-btn">Finalizar Entrenamiento</button>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Styles remain the same as before */
+  .container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .workout-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 1.5rem;
+  }
+
+  .workout-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    margin: 0;
+  }
+
+  .workout-header p {
+    font-size: 1.125rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+
+  .exercises-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .exercise-card {
+    background-color: var(--white-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.07);
+    overflow: hidden;
+  }
+
+  .exercise-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #f8f9fa;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .exercise-number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: var(--white-color);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .exercise-card-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    margin: 0;
+    color: var(--primary-color);
+  }
+
+  .sets-table {
+    padding: 0.5rem 1.5rem 1.5rem;
+  }
+
+  .table-header, .set-row {
+    display: grid;
+    grid-template-columns: 50px 1.5fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 0;
+  }
+
+  .table-header {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .set-row {
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .set-row:last-child {
+    border-bottom: none;
+  }
+
+  .set-cell {
+    font-size: 1rem;
+    color: #343a40;
+  }
+  
+  .set-number-cell {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .planned-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+  .planned-cell span {
+    background-color: #e9ecef;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  
+  .performed-cell {
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .finish-workout-section {
+    margin-top: 3rem;
+    text-align: center;
+  }
+
+  .finish-btn {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--white-color);
+    background: linear-gradient(45deg, var(--accent-color), #00a0a0);
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2);
+  }
+
+  .finish-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 128, 128, 0.3);
+  }
+</style>

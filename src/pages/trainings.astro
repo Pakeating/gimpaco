@@ -1,15 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import trainingData from '../../data/datamodel.json';
 
-const trainings = trainingData.trainings;
+const response = await fetch(Astro.url.origin + '/api/retrieve-workout');
+const trainings = await response.json();
 ---
 
 <Layout title="Mis Entrenamientos">
   <main class="container">
     <div class="header-section">
-      <h1>Mis Entrenamientos</h1>
-      <p>Aquí tienes tus rutinas guardadas. ¡Listo para empezar a entrenar!</p>
+      <h1>Nuestros Entrenamientos</h1>
+      <p>Explora nuestras rutinas prediseñadas. ¡Listas para empezar a entrenar!</p>
     </div>
 
     <div class="trainings-grid">
@@ -30,7 +30,7 @@ const trainings = trainingData.trainings;
             </ul>
           </div>
           <div class="card-footer">
-            <a href="#" class="start-btn">Comenzar Entrenamiento &rarr;</a>
+            <a href={`/workout/${training.id}`} class="start-btn">Comenzar Entrenamiento &rarr;</a>
           </div>
         </article>
       ))}
@@ -39,6 +39,7 @@ const trainings = trainingData.trainings;
 </Layout>
 
 <style>
+  /* Styles remain the same */
   .container {
     max-width: 900px;
     margin: 2rem auto;

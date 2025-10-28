@@ -1,4 +1,5 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
 import Navbar from '../components/Navbar.astro';
 import PwaComponent from '../components/PwaComponent.astro';
 import '../styles/global.css';
@@ -21,44 +22,64 @@ import '../styles/global.css';
     <PwaComponent />
 
     <style>
-      body.unverified {
-        display: none;
+      body {
+        /* The default state should be visible */
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+      }
+      /* Style for when we are transitioning pages */
+      ::view-transition-old(root) {
+        animation: fade-out 0.3s ease-in-out both;
+      }
+      ::view-transition-new(root) {
+        animation: fade-in 0.3s ease-in-out both;
+      }
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes fade-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
       }
     </style>
+    <ViewTransitions fallback="animate" />
 	</head>
-	<body class="unverified">
+	<body>
     <!-- La Navbar solo se muestra si la página no es la de login -->
     {Astro.url.pathname !== '/loginPage' && <Navbar />}
 		<slot />
 
     <script>
-      import { onAuthStateChanged } from "firebase/auth";
-      import { auth } from "../firebase/config";
+      // We are leaving the auth logic commented out for now to ease testing.
+      // We can restore this functionality later.
 
-      const currentPath = window.location.pathname;
-      const isAuthPage = currentPath === '/loginPage';
+      // import { onAuthStateChanged } from "firebase/auth";
+      // import { auth } from "../firebase/config";
 
-    //   DEJAMOS ESTO COMENTADO PARA FACILITAR EL PROCESO DE PRUEBAS
-    // const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //     if (user) {
-    //       // USUARIO AUTENTICADO:
-    //         if (isAuthPage) {
-    //         window.location.href = '/';
-    //       }
-    //     } else {
-    //       // USUARIO NO AUTENTICADO:
-    //       if (!isAuthPage) {
-    //         window.location.href = '/loginPage';
-    //       }
-    //     }
+      // function handleAuth() {
+      //   const currentPath = window.location.pathname;
+      //   const isAuthPage = currentPath === '/loginPage';
 
-    //     // Una vez que tenemos el estado de autenticación, mostramos el contenido de la página.
-        document.body.classList.remove('unverified');
-        
-    //     // Cancelamos la suscripción para que esta lógica solo se ejecute una vez por carga de página.
-    //     unsubscribe();
-        
-    //   });
+      //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+      //     if (user) {
+      //       if (isAuthPage) {
+      //         window.location.href = '/';
+      //       }
+      //     } else {
+      //       if (!isAuthPage) {
+      //         window.location.href = '/loginPage';
+      //       }
+      //     }
+      //     unsubscribe(); // We only need this to run once per auth state change
+      //   });
+      // }
+
+      // // Run auth logic on initial page load
+      // handleAuth();
+      
+      // // Re-run auth logic on subsequent page loads (for View Transitions)
+      // document.addEventListener('astro:page-load', handleAuth);
     </script>
 	</body>
 </html>

@@ -172,7 +172,7 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
           const set = { id: setRow.dataset.setId,
             repetitions: parseInt(setRow.querySelector('[name="repetitions"]').value, 10),
             intensity: setRow.querySelector('[name="intensity"]').value,
-            weight_kg: weightValue };
+            weight: weightValue };
           exercise.sets.push(set);
         });
         workoutData.exercises.push(exercise);
