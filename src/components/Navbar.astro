@@ -5,7 +5,7 @@ const currentPath = Astro.url.pathname;
 <header class="navbar">
     <div class="navbar-container">
         <div class="brand">
-            <a href="/">GimPac<span class="accent">o</span></a>
+            <a href="/"><span class="accent">G</span>impac<span class="accent">O</span></a>
         </div>
         
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-controls="nav-links" aria-expanded="false">
@@ -15,7 +15,8 @@ const currentPath = Astro.url.pathname;
 
         <nav class="nav-links" id="nav-links">
             <a href="/" class="nav-link" class:list={{ active: currentPath === '/' }}>Inicio</a>
-            <a href="/createWorkout" class="nav-link" class:list={{ active: currentPath === '/createWorkout' }}>Crear Rutina</a>
+            <a href="/trainings" class="nav-link" class:list={{ active: currentPath === '/trainings' }}>Entrenamientos</a>
+            <a href="/createWorkout" class="nav-link" class="nav-link" class:list={{ active: currentPath === '/createWorkout' }}>Crear Rutina</a>
             <a href="/workout" class="nav-link" class:list={{ active: currentPath === '/workout' }}>Entrenar</a>
             <a href="/history" class="nav-link" class:list={{ active: currentPath === '/history' }}>Historial</a>
             <a id="install-app-link" href="#" class="nav-link" style="display: none;">Instalar App</a>
@@ -35,7 +36,6 @@ const currentPath = Astro.url.pathname;
     .nav-link:hover::after { transform: scaleX(1); }
     .nav-link.active { color: var(--primary-color, #2A2A2A); }
     .nav-link.active::after { transform: scaleX(1); }
-    /* Estilo para que el botón parezca un enlace de navegación */
     button.nav-link { background: none; border: none; padding: 0; margin: 0; text-align: inherit; }
     button.nav-link:hover { color: var(--accent-color, #008080); }
 
@@ -45,8 +45,35 @@ const currentPath = Astro.url.pathname;
     .menu-toggle.is-open .close-icon { display: block; }
 
     @media (max-width: 768px) {
-        .menu-toggle { display: block; }
-        .nav-links { position: absolute; top: 100%; left: 0; right: 0; background-color: #FFFFFF; flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem 0; border-top: 1px solid #F5F5F5; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transform: translateY(-120%); transition: transform 0.3s ease-in-out; z-index: 999; }
+        .navbar-container {
+            position: relative; /* Set context for the absolute menu toggle */
+            justify-content: center; /* Center the brand/logo */
+        }
+
+        .menu-toggle {
+            display: block;
+            position: absolute; /* Take the button out of the flex flow */
+            right: 2rem; /* Match the navbar horizontal padding */
+            top: 50%; /* Vertically center */
+            transform: translateY(-50%);
+        }
+        
+        .nav-links {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #FFFFFF;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            border-top: 1px solid #F5F5F5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transform: translateY(-120%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 999;
+        }
         .nav-links.is-open { transform: translateY(0); }
         .nav-link, button.nav-link { font-size: 1.125rem; width: 100%; text-align: center; }
     }
@@ -70,7 +97,6 @@ const currentPath = Astro.url.pathname;
         });
     }
 
-    //
     const menuToggle = document.getElementById('menu-toggle');
     const navLinks = document.getElementById('nav-links');
 

@@ -24,3 +24,13 @@ A modern and intuitive web application for workout and meal tracking, designed t
     *   Soft, deep drop shadows on cards to create a "lifted" sense of depth.
     *   A "glow" effect on interactive elements on hover.
 
+### PWA (Progressive Web App)
+
+*   **`PwaComponent.astro`:** A dedicated component to encapsulate all PWA-related logic.
+*   **`manifest.json`:** Provides the browser with metadata for the PWA, including name, icons, and display mode. Located in `public/manifest.json`.
+*   **Service Worker:**
+    *   `src/sw.js`: The source file for the service worker, using Workbox for precaching.
+    *   `workbox-config.js`: Configuration file for `workbox-cli` to generate the production service worker (`public/sw.js`).
+    *   `postbuild` script in `package.json`: Runs the `workbox-cli` to build the service worker after the Astro build is complete.
+*   **Installation:** The app can be installed on mobile and desktop devices.
+*   **Offline Access:** The service worker caches essential assets, allowing the app to be used offline.

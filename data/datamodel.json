@@ -1,0 +1,60 @@
+{
+  "trainings": [
+    {
+      "id": "training-01",
+      "name": "Día de Fuerza - Pierna",
+      "exercises": [
+        {
+          "id": "ex-01-01",
+          "name": "Sentadillas",
+          "sets": [
+            { "id": "set-01-01-01", "repetitions": 5, "intensity_percent": 85, "weight_kg": 100 },
+            { "id": "set-01-01-02", "repetitions": 5, "intensity_percent": 85, "weight_kg": 100 },
+            { "id": "set-01-01-03", "repetitions": 5, "intensity_percent": 85, "weight_kg": 100 }
+          ]
+        },
+        {
+          "id": "ex-01-02",
+          "name": "Prensa de Piernas",
+          "sets": [
+            { "id": "set-01-02-01", "repetitions": 10, "intensity_percent": 80, "weight_kg": 150 },
+            { "id": "set-01-02-02", "repetitions": 10, "intensity_percent": 80, "weight_kg": 150 },
+            { "id": "set-01-02-03", "repetitions": 10, "intensity_percent": 80, "weight_kg": 150 }
+          ]
+        },
+        {
+          "id": "ex-01-03",
+          "name": "Extensiones de Cuádriceps",
+          "sets": [
+            { "id": "set-01-03-01", "repetitions": 12, "intensity_percent": 75, "weight_kg": 40 },
+            { "id": "set-01-03-02", "repetitions": 12, "intensity_percent": 75, "weight_kg": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "training-02",
+      "name": "Día de Empuje - Pecho y Hombros",
+      "exercises": [
+        {
+          "id": "ex-02-01",
+          "name": "Press de Banca",
+          "sets": [
+            { "id": "set-02-01-01", "repetitions": 8, "intensity_percent": 80, "weight_kg": 80 },
+            { "id": "set-02-01-02", "repetitions": 8, "intensity_percent": 80, "weight_kg": 80 },
+            { "id": "set-02-01-03", "repetitions": 8, "intensity_percent": 80, "weight_kg": 80 }
+          ]
+        },
+        {
+          "id": "ex-02-02",
+          "name": "Press Militar",
+          "sets": [
+            { "id": "set-02-02-01", "repetitions": 10, "intensity_percent": 75, "weight_kg": 40 },
+            { "id": "set-02-02-02", "repetitions": 10, "intensity_percent": 75, "weight_kg": 40 },
+            { "id": "set-02-02-03", "repetitions": 10, "intensity_percent": 75, "weight_kg": 40 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+--- 
+/*
+  GUÍA PARA REUTILIZAR ESTE COMPONENTE PWA (ENFOQUE MANUAL)
+
+  Este archivo convierte un sitio Astro en una PWA (Progressive Web App) con un Service Worker gestionado manualmente,
+  lo que te da control total sobre la caché. Sigue estos 4 pasos para reutilizarlo:
+
+  --- PASO 1: Copiar este componente ---
+
+  1. Copia este archivo (`PwaComponent.astro`) a la carpeta `src/components/` de tu nuevo proyecto.
+
+
+  --- PASO 2: Crear los archivos públicos ---
+
+  1. Crea el archivo `public/manifest.json`:
+     Copia el contenido del `manifest.json` de este proyecto y pégalo en el nuevo.
+     ¡IMPORTANTE! Personaliza los valores (`name`, `short_name`, `icons`, etc.) para tu nueva app.
+
+  2. Crea el Service Worker manual en `public/sw.js`:
+     Copia y pega el siguiente código en `public/sw.js`. Este será tu Service Worker real.
+
+     // Contenido para public/sw.js
+     const CACHE_NAME = 'mi-app-cache-v1'; // <-- ¡Cambia esto por algo único para tu app!
+     const ASSETS_TO_CACHE = [
+       '/', // <-- La página principal
+       // --- ¡AÑADE AQUÍ TUS ARCHIVOS! ---
+       // Ej: '/styles/global.css',
+       // Ej: '/about',
+       // Ej: '/assets/logo.png'
+       // ------------------------------------ 
+     ];
+
+     self.addEventListener('install', (event) => {
+       event.waitUntil(
+         caches.open(CACHE_NAME).then((cache) => {
+           console.log('Service Worker: Cacheando archivos del App Shell');
+           return cache.addAll(ASSETS_TO_CACHE);
+         })
+       );
+     });
+
+     self.addEventListener('activate', (event) => {
+       event.waitUntil(
+         caches.keys().then((cacheNames) => {
+           return Promise.all(
+             cacheNames.map((cacheName) => {
+               if (cacheName !== CACHE_NAME) {
+                 console.log('Service Worker: Borrando caché antigua', cacheName);
+                 return caches.delete(cacheName);
+               }
+             })
+           );
+         })
+       );
+       return self.clients.claim();
+     });
+
+     self.addEventListener('fetch', (event) => {
+       event.respondWith(
+         caches.match(event.request)
+           .then((response) => {
+             return response || fetch(event.request);
+           })
+       );
+     });
+
+
+  --- PASO 3: Personalizar tu Service Worker ---
+
+  1. Edita `public/sw.js`.
+  2. Cambia `CACHE_NAME` a un nombre único para tu proyecto.
+  3. ¡MUY IMPORTANTE! Añade a la lista `ASSETS_TO_CACHE` todas las rutas a las páginas, CSS, JS e imágenes que quieras que funcionen offline.
+     Recuerda que cada vez que añadas un nuevo recurso esencial, debes añadirlo a esta lista.
+
+
+  --- PASO 4: Integrar el componente en tu Layout ---
+
+  1. Abre tu layout principal (ej: `src/layouts/Layout.astro`).
+  2. Importa y añade este componente dentro de la etiqueta `<head>`.
+
+     ---
+     import PwaComponent from '../components/PwaComponent.astro'; // <-- Importa
+     ---
+     <html lang="es">
+       <head>
+         <PwaComponent />  // <-- Añade el componente aquí
+       </head>
+       <body>...
+
+  ¡LISTO! Ahora tienes una PWA con un Service Worker manual que te da control total sobre qué cachear.
+*/
+
+const manifest = {
+  "name": "Astro PWA",
+  "short_name": "AstroPWA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 256x256 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+};
+const siteUrl = Astro.url.origin;
+const manifestWithAbsoluteUrls = {
+  ...manifest,
+  start_url: `${siteUrl}${manifest.start_url}`,
+  icons: manifest.icons.map(icon => ({ ...icon, src: `${siteUrl}${icon.src}` }))
+};
+const encodedManifest = JSON.stringify(manifestWithAbsoluteUrls);
+---
+<link rel="manifest" href={`data:application/manifest+json,${encodeURIComponent(encodedManifest)}`}>
+<div id="install-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2>Instalar Aplicación</h2>
+    <p>¡Añade Gimpaco a tu pantalla de inicio para un acceso más rápido y una mejor experiencia!</p>
+    <div class="modal-buttons">
+        <button id="install-button" class="install-btn">Instalar</button>
+        <button id="close-modal-button" class="close-btn">Ahora no</button>
+    </div>
+  </div>
+</div>
+<script is:inline>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+
+  let deferredPrompt;
+  const installModal = document.getElementById('install-modal');
+  const installButton = document.getElementById('install-button');
+  const closeModalButton = document.getElementById('close-modal-button');
+  const MODAL_DISMISS_KEY = 'pwaInstallDismissedAt';
+  const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
+
+  function showInstallModal() {
+    // 1. No mostrar si la app ya está instalada
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('PWA ya instalada. No se muestra el modal.');
+      return;
+    }
+
+    // 2. Comprobar cuándo se cerró el modal por última vez
+    const lastDismissed = localStorage.getItem(MODAL_DISMISS_KEY);
+    const now = new Date().getTime();
+
+    if (lastDismissed) {
+      const timeSinceDismissed = now - parseInt(lastDismissed, 10);
+      if (timeSinceDismissed < TWO_HOURS_IN_MS) {
+        console.log('Modal cerrado recientemente. No se muestra.');
+        return;
+      }
+    }
+    
+    // 3. Si se cumplen las condiciones, mostrar el modal
+    installModal.style.display = 'flex';
+  }
+
+  function dismissInstallModal() {
+    installModal.style.display = 'none';
+    // Guardar la marca de tiempo actual en localStorage
+    localStorage.setItem(MODAL_DISMISS_KEY, new Date().getTime().toString());
+    console.log('Modal cerrado. Se guardó la marca de tiempo.');
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Llamar a nuestra nueva función para decidir si se muestra el modal
+    showInstallModal();
+  });
+
+  installButton.addEventListener('click', async () => {
+    installModal.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      // Si el usuario acepta, ya no necesitamos recordar que lo cerró
+      if (outcome === 'accepted') {
+        localStorage.removeItem(MODAL_DISMISS_KEY);
+      }
+      deferredPrompt = null;
+    }
+  });
+
+  // Ambos, el botón de cerrar y el clic fuera, descartan el modal
+  closeModalButton.addEventListener('click', dismissInstallModal);
+  installModal.addEventListener('click', (event) => {
+    if (event.target === installModal) {
+      dismissInstallModal();
+    }
+  });
+</script>
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; 
+        z-index: 1000;
+        padding: 20px;
+        padding-top: 5vh; 
+        box-sizing: border-box;
+    }
+
+    .modal-content {
+        background-color: #FFFFFF;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        font-family: 'Lato', sans-serif;
+        border: 1px solid #E0E0E0;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        color: #2A2A2A;
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-content p {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .modal-buttons button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .install-btn {
+        background-color: #008080; 
+        color: white;
+    }
+
+    .install-btn:hover {
+        background-color: #006666;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 128, 128, 0.3);
+    }
+    
+    .close-btn {
+        background-color: #F5F5F5;
+        color: #555;
+        border: 1px solid #E0E0E0;
+    }
+
+    .close-btn:hover {
+        background-color: #EAEAEA;
+    }
+</style>

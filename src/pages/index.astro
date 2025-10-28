@@ -1,17 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PendingWorkout from '../components/pending-workout.astro';
+import Logo from '../components/Logo.astro';
 ---
 
 <Layout>
   <div class="welcome-container">
     <header class="welcome-header">
-      <h1>Bienvenido a Gimpac<span class="accent">o</span></h1>
+      <h1>Bienvenido a <Logo/> </h1>
       <p>¿Como quieres ponerte en forma hoy?</p>
     </header>
 
     <main class="action-cards">
-      <a href="/new-workout" class="card begin-workout">
+      <a href="/workout" class="card begin-workout">
         <div class="card-content">
           <PendingWorkout />
           <h2 class="workout-title">Comenzar Entrenamiento</h2>
@@ -30,6 +31,7 @@ import PendingWorkout from '../components/pending-workout.astro';
 </Layout>
 
 <style>
+  .accent { color: var(--accent-color, #008080); }
   .welcome-container {
     max-width: 64rem;
     margin: 4rem auto;

@@ -1,162 +1,216 @@
 ---
-
+{/*
+  Este componente renderiza un formulario para crear un nuevo entrenamiento.
+  Los bloques de ejercicio son ahora colapsables para una mejor experiencia de usuario.
+*/}
 ---
 
-<form class="workout-form">
+<form id="workout-form" class="workout-form">
   <div class="form-group workout-name-group">
     <label for="workout-name">Nombre del Entrenamiento</label>
-    <input type="text" id="workout-name" placeholder="Ej: Lunes - Pecho y Tríceps">
+    <input type="text" id="workout-name" name="workout-name" placeholder="Ej: Lunes - Pecho y Tríceps" required>
   </div>
 
   <fieldset class="exercises-fieldset">
     <legend>Ejercicios</legend>
-    <div id="exercises-list">
-
-    </div>
+    <div id="exercises-container"></div>
     <button type="button" id="add-exercise-btn" class="add-btn">+ Añadir Ejercicio</button>
   </fieldset>
 
   <button type="submit" class="save-workout-btn">Guardar Entrenamiento</button>
 </form>
 
-<!-- Template para una nueva fila de ejercicio. Es invisible y se usa para clonar. -->
-<template id="exercise-row-template">
-  <div class="exercise-row">
-    <input type="text" name="exercise-name" placeholder="Nombre del Ejercicio">
-    <input type="number" name="sets" placeholder="Series">
-    <input type="number" name="reps" placeholder="Reps">
-    <input type="number" name="weight" placeholder="Peso (kg)">
-    <button type="button" class="remove-exercise-btn">&times;</button>
+<!-- ========= TEMPLATES ========= -->
+
+<template id="exercise-template">
+  <div class="exercise-block" data-exercise-id="">
+    <div class="exercise-header">
+      <button type="button" class="toggle-exercise-btn" aria-label="Contraer/Expandir Ejercicio">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <input type="text" name="exercise-name" placeholder="Nombre del Ejercicio" class="exercise-name-input" required>
+      <button type="button" class="remove-btn remove-exercise-btn" aria-label="Eliminar Ejercicio">&times;</button>
+    </div>
+    <div class="exercise-content">
+      <div class="sets-container"></div>
+      <button type="button" class="add-btn add-set-btn">+ Añadir Serie</button>
+    </div>
   </div>
 </template>
 
+<template id="set-template">
+  <div class="set-row" data-set-id="">
+    <div class="set-input-group"><label>Reps</label><input type="number" name="repetitions" placeholder="Reps" min="1" required></div>
+    <div class="set-input-group"><label>Intensidad</label><input type="text" name="intensity" placeholder="Ej: 80%, RPE 8, RIR 2" required></div>
+    <div class="weight-toggle-wrapper"><button type="button" class="add-weight-btn">+ Añadir Peso</button><div class="set-input-group weight-input-group" style="display: none;"><label>Peso (kg)</label><input type="number" name="weight" placeholder="Peso (kg)" min="0"></div></div>
+    <button type="button" class="remove-btn remove-set-btn" aria-label="Eliminar Serie">&times;</button>
+  </div>
+</template>
+
+
 <style>
+:root { --primary-color: #2A2A2A; --accent-color: #008080; --white-color: #FFFFFF; --light-gray: #f5f5f5; --border-color: #ddd; --danger-color: #ff4d4d; --success-color: #28a745; }
+.workout-form { background-color: var(--white-color); padding: 2.5rem; border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); text-align: left; }
+.form-group, .exercises-fieldset { margin-bottom: 2rem; }
+label, legend { display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.125rem; color: var(--primary-color); margin-bottom: 1rem; }
+input[type="text"], input[type="number"] { width: 100%; padding: 0.75rem 1rem; font-family: 'Lato', sans-serif; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; box-sizing: border-box; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2); }
+.exercises-fieldset { border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1.5rem; }
 
-  .workout-form {
-    background-color: var(--white-color);
-    padding: 2.5rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    text-align: left;
-  }
+/* --- Exercise Block Styles --- */
+.exercise-block { background-color: var(--light-gray); border: 1px solid #e0e0e0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; transition: padding 0.3s ease; }
+.exercise-header { display: flex; align-items: center; cursor: pointer; user-select: none; margin-bottom: 1.5rem; }
+.toggle-exercise-btn { background: none; border: none; cursor: pointer; padding: 0 0.5rem 0 0; color: var(--primary-color); transition: transform 0.3s ease; }
+.toggle-exercise-btn svg { display: block; width: 20px; height: 20px; }
+.exercise-name-input { flex-grow: 1; }
+.remove-btn { background: none; border: none; color: #aaa; font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0 0.5rem; line-height: 1; margin-left: 0.5rem; transition: color 0.2s ease; }
+.remove-exercise-btn { font-size: 2rem; }
+.remove-btn:hover { color: var(--danger-color); }
 
-  .form-group, .exercises-fieldset {
-    margin-bottom: 2rem;
-  }
+/* --- Collapsible Logic --- */
+.exercise-content { overflow: hidden; transition: max-height 0.35s ease-out; max-height: 1000px; /* Larger than any possible content */ }
+.exercise-block.is-collapsed { padding-top: 1rem; padding-bottom: 1rem; }
+.exercise-block.is-collapsed > .exercise-header { margin-bottom: 0; }
+.exercise-block.is-collapsed > .exercise-content { max-height: 0; }
+.exercise-block.is-collapsed .toggle-exercise-btn { transform: rotate(-90deg); }
 
-  label, legend {
-    display: block;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1.125rem;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-  }
+/* --- Set Styles --- */
+.set-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: flex-end; margin-bottom: 0.75rem; }
+.set-input-group label { display: none; }
+.weight-toggle-wrapper { display: flex; align-items: center; justify-content: center; }
+.add-weight-btn { background-color: transparent; border: 1px dashed var(--border-color); color: #777; padding: 0.75rem 1rem; border-radius: 0.5rem; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.9rem; width: 100%; height: 100%; transition: all 0.2s ease; }
+.add-weight-btn:hover { background-color: #f0f0f0; border-color: var(--accent-color); color: var(--accent-color); }
+.add-btn { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; border: none; border-radius: 999px; padding: 0.7rem 1.5rem; cursor: pointer; transition: all 0.2s ease; text-align: center; background-color: #e0e7e7; color: var(--accent-color); }
+.add-btn:hover { background-color: #d0e0e0; transform: translateY(-1px); }
+.add-set-btn { display: block; margin: 1rem auto 0; }
 
-  input[type="text"], input[type="number"] {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-family: 'Lato', sans-serif;
-    font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
+/* --- Main Action Button --- */
+.save-workout-btn { background-image: linear-gradient(45deg, var(--accent-color), #009688); color: var(--white-color); display: block; width: 100%; margin-top: 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.125rem; border: none; border-radius: 999px; padding: 0.7rem 1.5rem; cursor: pointer; box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4); transition: all 0.2s ease; }
+.save-workout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5); }
+.save-workout-btn:disabled { background: #ccc; cursor: not-allowed; }
+.save-workout-btn.is-success { background-image: linear-gradient(45deg, var(--success-color), #218838); }
+.save-workout-btn.is-error { background-image: linear-gradient(45deg, var(--danger-color), #c82333); }
 
-  input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2);
-  }
-
-  .exercises-fieldset {
-    border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-  }
-
-  .exercise-row {
-    display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .exercise-row:only-child .remove-exercise-btn {
-      display: none;
-  }
-
-  .remove-exercise-btn {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 1.75rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.2s ease;
-  }
-
-  .remove-exercise-btn:hover {
-    color: #ff4d4d;
-  }
-
-  .add-btn, .save-workout-btn {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--white-color);
-    border: none;
-    border-radius: 999px;
-    padding: 0.8rem 2rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  
-  .add-btn {
-    background-color: var(--primary-color-light);
-    color: var(--primary-color);
-  }
-
-  .add-btn:hover {
-    background-color: #d0e0e0;
-  }
-
-  .save-workout-btn {
-    background-image: linear-gradient(45deg, var(--accent-color), #009688);
-    display: block;
-    width: 100%;
-    margin-top: 1rem;
-    font-size: 1.125rem;
-    box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4);
-  }
-
-  .save-workout-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5);
-  }
+/* --- Responsive Styles --- */
+@media (max-width: 768px) { .workout-form { padding: 1.5rem; } .exercises-fieldset { padding: 0; border: none; } .exercise-block { padding: 1rem 0; background: none; border: none; border-bottom: 1px solid #e0e0e0; border-radius: 0; } .set-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 1.25rem 1rem; align-items: flex-start; } .weight-toggle-wrapper { grid-column: 1 / 2; grid-row: 2 / 3; } .set-input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; } .remove-set-btn { grid-column: 2; grid-row: 2; justify-self: flex-end; align-self: center; margin: 0; } .set-row input::placeholder { color: transparent; } }
 </style>
 
 <script>
+  const generateId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+  const addSet = (setsContainer) => {
+    const setTemplate = document.getElementById('set-template');
+    const newSet = setTemplate.content.cloneNode(true).firstElementChild;
+    newSet.dataset.setId = generateId('set');
+    setsContainer.appendChild(newSet);
+  };
+
+  const resetForm = (form) => {
+      form.reset();
+      document.getElementById('exercises-container').innerHTML = '';
+      addExercise();
+  }
+
+  const addExercise = () => {
+    // Collapse all other exercise blocks before adding a new one
+    document.querySelectorAll('.exercise-block:not(.is-collapsed)').forEach(block => {
+        block.classList.add('is-collapsed');
+    });
+
+    const exercisesContainer = document.getElementById('exercises-container');
+    const exerciseTemplate = document.getElementById('exercise-template');
+    const newExercise = exerciseTemplate.content.cloneNode(true).firstElementChild;
+    newExercise.dataset.exerciseId = generateId('ex');
+    const setsContainer = newExercise.querySelector('.sets-container');
+    addSet(setsContainer);
+    exercisesContainer.appendChild(newExercise);
+    newExercise.querySelector('[name="exercise-name"]').focus();
+  };
+  
   document.addEventListener('DOMContentLoaded', () => {
-    const addExerciseBtn = document.getElementById('add-exercise-btn');
-    const exercisesList = document.getElementById('exercises-list');
-    const exerciseRowTemplate = document.getElementById('exercise-row-template');
+    const workoutForm = document.getElementById('workout-form');
+    addExercise(); // Add the first exercise block by default
 
-    const addExerciseRow = () => {
-      const templateContent = exerciseRowTemplate.content.cloneNode(true);
-      exercisesList.appendChild(templateContent);
-    };
+    workoutForm.addEventListener('click', (e) => {
+      // Use `closest` to handle clicks on the header or the toggle button svg/path
+      const header = e.target.closest('.exercise-header');
+      if (header && !e.target.closest('input, .remove-btn')) {
+        header.parentElement.classList.toggle('is-collapsed');
+      }
 
-    // Añadir la primera fila de ejercicio al cargar la página
-    addExerciseRow();
+      if (e.target.id === 'add-exercise-btn') addExercise();
+      if (e.target.classList.contains('add-set-btn')) addSet(e.target.closest('.exercise-content').querySelector('.sets-container'));
+      if (e.target.classList.contains('remove-set-btn')) e.target.closest('.set-row').remove();
+      if (e.target.classList.contains('remove-exercise-btn')) e.target.closest('.exercise-block').remove();
+      
+      if (e.target.classList.contains('add-weight-btn')) {
+        const wrapper = e.target.closest('.weight-toggle-wrapper');
+        const weightInputGroup = wrapper.querySelector('.weight-input-group');
+        e.target.style.display = 'none';
+        weightInputGroup.style.display = 'block';
+        weightInputGroup.querySelector('input').focus();
+      }
+    });
 
+    // Handle form submission (unchanged)
+    workoutForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveButton = workoutForm.querySelector('.save-workout-btn');
+      const originalButtonText = saveButton.textContent;
+      saveButton.textContent = 'Guardando...';
+      saveButton.disabled = true;
 
-    addExerciseBtn.addEventListener('click', addExerciseRow);
-    exercisesList.addEventListener('click', (e) => {
-      if (e.target && e.target.classList.contains('remove-exercise-btn')) {
-        e.target.closest('.exercise-row').remove();
+      const workoutNameInput = document.getElementById('workout-name');
+      const workoutData = { id: generateId('training'), name: workoutNameInput.value, exercises: [] };
+
+      document.querySelectorAll('.exercise-block').forEach(exerciseBlock => {
+        const exerciseNameInput = exerciseBlock.querySelector('[name="exercise-name"]');
+        const exercise = { id: exerciseBlock.dataset.exerciseId, name: exerciseNameInput.value, sets: [] };
+        exerciseBlock.querySelectorAll('.set-row').forEach(setRow => {
+          const weightInput = setRow.querySelector('[name="weight"]');
+          const weightValue = weightInput && weightInput.value ? parseFloat(weightInput.value) : null;
+          const set = { id: setRow.dataset.setId,
+            repetitions: parseInt(setRow.querySelector('[name="repetitions"]').value, 10),
+            intensity: setRow.querySelector('[name="intensity"]').value,
+            weight_kg: weightValue };
+          exercise.sets.push(set);
+        });
+        workoutData.exercises.push(exercise);
+      });
+
+      try {
+        const response = await fetch('/api/save-workout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(workoutData)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error del servidor: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          saveButton.textContent = '¡Guardado con Éxito!';
+          saveButton.classList.add('is-success');
+          resetForm(workoutForm);
+        } else {
+          throw new Error(result.message || 'El servidor indicó un fallo no especificado.');
+        }
+
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        saveButton.textContent = 'Error al Guardar';
+        saveButton.classList.add('is-error');
+        alert(error.message);
+      } finally {
+        setTimeout(() => {
+          saveButton.textContent = originalButtonText;
+          saveButton.disabled = false;
+          saveButton.classList.remove('is-success', 'is-error');
+        }, 3000);
       }
     });
   });
