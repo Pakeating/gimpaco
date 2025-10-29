@@ -22,12 +22,18 @@ import '../styles/global.css';
     <PwaComponent />
 
     <style>
+      /* === GLOBAL LAYOUT FIXES === */
+      html, body {
+        width: 100%; /* Ensure the body takes full width */
+        overflow-x: hidden; /* Prevent horizontal scroll caused by decorative elements */
+      }
+
       body {
-        /* The default state should be visible */
         opacity: 1;
         transition: opacity 0.3s ease-in-out;
       }
-      /* Style for when we are transitioning pages */
+
+      /* === VIEW TRANSITION STYLES === */
       ::view-transition-old(root) {
         animation: fade-out 0.3s ease-in-out both;
       }

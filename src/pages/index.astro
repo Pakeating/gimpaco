@@ -35,7 +35,8 @@ import Logo from '../components/Logo.astro';
   .welcome-container {
     max-width: 64rem;
     margin: 4rem auto;
-    padding: 2rem;
+    /* CORRECTED: Removed horizontal padding to fix mobile navbar overflow */
+    padding: 2rem 0;
     text-align: center;
   }
 
@@ -54,17 +55,26 @@ import Logo from '../components/Logo.astro';
     opacity: 0.9;
     max-width: 40rem;
     margin: 0 auto 3rem auto;
+    /* Added padding for mobile view to compensate for the container's change */
+    padding: 0 1rem;
   }
 
   .action-cards {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
+    /* Added padding for mobile view */
+    padding: 0 1rem;
   }
 
   @media (min-width: 768px) {
     .action-cards {
       grid-template-columns: repeat(2, 1fr);
+      /* Reset padding for desktop */
+      padding: 0;
+    }
+    .welcome-header p {
+        padding: 0;
     }
   }
 

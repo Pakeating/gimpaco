@@ -84,7 +84,6 @@ const currentPath = Astro.url.pathname;
 
         // --- PWA Install Button --- //
         const installAppLink = document.getElementById('install-app-link');
-        // If the prompt was already captured, show the button
         if (installAppLink && window.deferredPrompt) {
             installAppLink.style.display = 'block';
         }
@@ -95,7 +94,6 @@ const currentPath = Astro.url.pathname;
                 
                 window.deferredPrompt.prompt();
                 const { outcome } = await window.deferredPrompt.userChoice;
-                // The prompt can only be used once.
                 window.deferredPrompt = null;
                 installAppLink.style.display = 'none';
             });
@@ -103,13 +101,11 @@ const currentPath = Astro.url.pathname;
     }
 
     // --- PWA 'beforeinstallprompt' Event Listener --- //
-    // This should only be attached once to the window object.
+    // This listener should only be attached once to the window object.
     if (!window.pwaPromptAttached) {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            // Stash the event so it can be triggered later.
             window.deferredPrompt = e;
-            // Update UI to notify the user they can install the PWA
             const installAppLink = document.getElementById('install-app-link');
             if (installAppLink) {
                 installAppLink.style.display = 'block';
@@ -118,9 +114,7 @@ const currentPath = Astro.url.pathname;
         window.pwaPromptAttached = true;
     }
 
-    // Run scripts on initial page load
-    initializeNavbar();
-
-    // Re-run scripts after every page transition for View Transitions
+    // CORRECTED: Run initialization on initial page load AND after every page transition.
+    // 'astro:page-load' is the single, reliable event for this.
     document.addEventListener('astro:page-load', initializeNavbar);
 </script>
