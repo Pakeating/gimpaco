@@ -53,7 +53,7 @@ import '../styles/global.css';
 	</head>
 	<body>
     <!-- La Navbar solo se muestra si la página no es la de login -->
-    {Astro.url.pathname !== '/loginPage' && <Navbar />}
+    {Astro.url.pathname !== '/login-page' && <Navbar />}
 		<slot />
 
     <script>
@@ -65,7 +65,7 @@ import '../styles/global.css';
 
       // function handleAuth() {
       //   const currentPath = window.location.pathname;
-      //   const isAuthPage = currentPath === '/loginPage';
+      //   const isAuthPage = currentPath === '/login-page'; // CORRECTED
 
       //   const unsubscribe = onAuthStateChanged(auth, (user) => {
       //     if (user) {
@@ -74,7 +74,7 @@ import '../styles/global.css';
       //       }
       //     } else {
       //       if (!isAuthPage) {
-      //         window.location.href = '/loginPage';
+      //         window.location.href = '/login-page'; // CORRECTED
       //       }
       //     }
       //     unsubscribe(); // We only need this to run once per auth state change

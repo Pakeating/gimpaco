@@ -47,7 +47,6 @@
   </div>
 </template>
 
-
 <style>
 :root { --primary-color: #2A2A2A; --accent-color: #008080; --white-color: #FFFFFF; --light-gray: #f5f5f5; --border-color: #ddd; --danger-color: #ff4d4d; --success-color: #28a745; }
 .workout-form { background-color: var(--white-color); padding: 2.5rem; border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); text-align: left; }
@@ -56,8 +55,6 @@ label, legend { display: block; font-family: 'Poppins', sans-serif; font-weight:
 input[type="text"], input[type="number"] { width: 100%; padding: 0.75rem 1rem; font-family: 'Lato', sans-serif; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; box-sizing: border-box; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2); }
 .exercises-fieldset { border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1.5rem; }
-
-/* --- Exercise Block Styles --- */
 .exercise-block { background-color: var(--light-gray); border: 1px solid #e0e0e0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; transition: padding 0.3s ease; }
 .exercise-header { display: flex; align-items: center; cursor: pointer; user-select: none; margin-bottom: 1.5rem; }
 .toggle-exercise-btn { background: none; border: none; cursor: pointer; padding: 0 0.5rem 0 0; color: var(--primary-color); transition: transform 0.3s ease; }
@@ -66,15 +63,11 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
 .remove-btn { background: none; border: none; color: #aaa; font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0 0.5rem; line-height: 1; margin-left: 0.5rem; transition: color 0.2s ease; }
 .remove-exercise-btn { font-size: 2rem; }
 .remove-btn:hover { color: var(--danger-color); }
-
-/* --- Collapsible Logic --- */
-.exercise-content { overflow: hidden; transition: max-height 0.35s ease-out; max-height: 1000px; /* Larger than any possible content */ }
+.exercise-content { overflow: hidden; transition: max-height 0.35s ease-out; max-height: 1000px; }
 .exercise-block.is-collapsed { padding-top: 1rem; padding-bottom: 1rem; }
 .exercise-block.is-collapsed > .exercise-header { margin-bottom: 0; }
 .exercise-block.is-collapsed > .exercise-content { max-height: 0; }
 .exercise-block.is-collapsed .toggle-exercise-btn { transform: rotate(-90deg); }
-
-/* --- Set Styles --- */
 .set-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: flex-end; margin-bottom: 0.75rem; }
 .set-input-group label { display: none; }
 .weight-toggle-wrapper { display: flex; align-items: center; justify-content: center; }
@@ -83,67 +76,78 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
 .add-btn { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; border: none; border-radius: 999px; padding: 0.7rem 1.5rem; cursor: pointer; transition: all 0.2s ease; text-align: center; background-color: #e0e7e7; color: var(--accent-color); }
 .add-btn:hover { background-color: #d0e0e0; transform: translateY(-1px); }
 .add-set-btn { display: block; margin: 1rem auto 0; }
-
-/* --- Main Action Button --- */
 .save-workout-btn { background-image: linear-gradient(45deg, var(--accent-color), #009688); color: var(--white-color); display: block; width: 100%; margin-top: 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.125rem; border: none; border-radius: 999px; padding: 0.7rem 1.5rem; cursor: pointer; box-shadow: 0 4px 15px -3px rgba(0, 128, 128, 0.4); transition: all 0.2s ease; }
 .save-workout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px -3px rgba(0, 128, 128, 0.5); }
 .save-workout-btn:disabled { background: #ccc; cursor: not-allowed; }
 .save-workout-btn.is-success { background-image: linear-gradient(45deg, var(--success-color), #218838); }
 .save-workout-btn.is-error { background-image: linear-gradient(45deg, var(--danger-color), #c82333); }
-
-/* --- Responsive Styles --- */
 @media (max-width: 768px) { .workout-form { padding: 1.5rem; } .exercises-fieldset { padding: 0; border: none; } .exercise-block { padding: 1rem 0; background: none; border: none; border-bottom: 1px solid #e0e0e0; border-radius: 0; } .set-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 1.25rem 1rem; align-items: flex-start; } .weight-toggle-wrapper { grid-column: 1 / 2; grid-row: 2 / 3; } .set-input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; } .remove-set-btn { grid-column: 2; grid-row: 2; justify-self: flex-end; align-self: center; margin: 0; } .set-row input::placeholder { color: transparent; } }
 </style>
 
 <script>
-  const generateId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-  const addSet = (setsContainer) => {
-    const setTemplate = document.getElementById('set-template');
-    const newSet = setTemplate.content.cloneNode(true).firstElementChild;
-    newSet.dataset.setId = generateId('set');
-    setsContainer.appendChild(newSet);
-  };
-
-  const resetForm = (form) => {
-      form.reset();
-      document.getElementById('exercises-container').innerHTML = '';
-      addExercise();
-  }
-
-  const addExercise = () => {
-    // Collapse all other exercise blocks before adding a new one
-    document.querySelectorAll('.exercise-block:not(.is-collapsed)').forEach(block => {
-        block.classList.add('is-collapsed');
-    });
+  // Function to initialize all the form logic
+  function initializeWorkoutForm() {
+    const workoutForm = document.getElementById('workout-form');
+    if (!workoutForm || workoutForm.dataset.initialized === 'true') {
+      return;
+    }
+    workoutForm.dataset.initialized = 'true';
 
     const exercisesContainer = document.getElementById('exercises-container');
     const exerciseTemplate = document.getElementById('exercise-template');
-    const newExercise = exerciseTemplate.content.cloneNode(true).firstElementChild;
-    newExercise.dataset.exerciseId = generateId('ex');
-    const setsContainer = newExercise.querySelector('.sets-container');
-    addSet(setsContainer);
-    exercisesContainer.appendChild(newExercise);
-    newExercise.querySelector('[name="exercise-name"]').focus();
-  };
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    const workoutForm = document.getElementById('workout-form');
-    addExercise(); // Add the first exercise block by default
+    const setTemplate = document.getElementById('set-template');
+
+    const generateId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    const addSet = (setsContainer) => {
+      const newSet = setTemplate.content.cloneNode(true).firstElementChild;
+      newSet.dataset.setId = generateId('set');
+      setsContainer.appendChild(newSet);
+    };
+
+    const resetForm = () => {
+      workoutForm.reset();
+      exercisesContainer.innerHTML = '';
+      addExercise();
+    }
+
+    const addExercise = () => {
+      document.querySelectorAll('.exercise-block:not(.is-collapsed)').forEach(block => {
+        block.classList.add('is-collapsed');
+      });
+
+      const newExercise = exerciseTemplate.content.cloneNode(true).firstElementChild;
+      newExercise.dataset.exerciseId = generateId('ex');
+      const setsContainer = newExercise.querySelector('.sets-container');
+      addSet(setsContainer);
+      exercisesContainer.appendChild(newExercise);
+      newExercise.querySelector('[name="exercise-name"]').focus();
+    };
+
+    // Add the first exercise block only if the container is empty
+    if (exercisesContainer.children.length === 0) {
+        addExercise();
+    }
 
     workoutForm.addEventListener('click', (e) => {
-      // Use `closest` to handle clicks on the header or the toggle button svg/path
       const header = e.target.closest('.exercise-header');
       if (header && !e.target.closest('input, .remove-btn')) {
         header.parentElement.classList.toggle('is-collapsed');
       }
 
-      if (e.target.id === 'add-exercise-btn') addExercise();
-      if (e.target.classList.contains('add-set-btn')) addSet(e.target.closest('.exercise-content').querySelector('.sets-container'));
+      if (e.target.id === 'add-exercise-btn') {
+        e.preventDefault(); // Prevent default button behavior
+        addExercise();
+      }
+      if (e.target.classList.contains('add-set-btn')) {
+        e.preventDefault();
+        addSet(e.target.closest('.exercise-content').querySelector('.sets-container'));
+      }
       if (e.target.classList.contains('remove-set-btn')) e.target.closest('.set-row').remove();
       if (e.target.classList.contains('remove-exercise-btn')) e.target.closest('.exercise-block').remove();
       
       if (e.target.classList.contains('add-weight-btn')) {
+        e.preventDefault();
         const wrapper = e.target.closest('.weight-toggle-wrapper');
         const weightInputGroup = wrapper.querySelector('.weight-input-group');
         e.target.style.display = 'none';
@@ -152,7 +156,6 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
       }
     });
 
-    // Handle form submission (unchanged)
     workoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const saveButton = workoutForm.querySelector('.save-workout-btn');
@@ -195,7 +198,7 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
         if (result.success) {
           saveButton.textContent = '¡Guardado con Éxito!';
           saveButton.classList.add('is-success');
-          resetForm(workoutForm);
+          resetForm();
         } else {
           throw new Error(result.message || 'El servidor indicó un fallo no especificado.');
         }
@@ -213,5 +216,8 @@ input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 
         }, 3000);
       }
     });
-  });
+  }
+
+  // Use Astro's page load event to initialize the form correctly with View Transitions
+  document.addEventListener('astro:page-load', initializeWorkoutForm);
 </script>

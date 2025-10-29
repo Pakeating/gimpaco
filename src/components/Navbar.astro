@@ -16,7 +16,7 @@ const currentPath = Astro.url.pathname;
         <nav class="nav-links" id="nav-links">
             <a href="/" class="nav-link" class:list={{ active: currentPath === '/' }}>Inicio</a>
             <a href="/trainings" class="nav-link" class:list={{ active: currentPath === '/trainings' }}>Entrenamientos</a>
-            <a href="/createWorkout" class="nav-link" class="nav-link" class:list={{ active: currentPath === '/createWorkout' }}>Crear Rutina</a>
+            <a href="/create-workout" class="nav-link" class:list={{ active: currentPath === '/create-workout' }}>Crear Rutina</a>
             <a href="/history" class="nav-link" class:list={{ active: currentPath === '/history' }}>Historial</a>
             <a id="install-app-link" href="#" class="nav-link" style="display: none;">Instalar App</a>
             <button id="logout-btn" class="nav-link">Cerrar Sesión</button>
@@ -64,7 +64,7 @@ const currentPath = Astro.url.pathname;
             logoutButton.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
-                    window.location.href = '/loginPage';
+                    window.location.href = '/login-page'; // CORRECTED
                 } catch (error) {
                     console.error('Error during sign out:', error);
                 }
@@ -114,7 +114,5 @@ const currentPath = Astro.url.pathname;
         window.pwaPromptAttached = true;
     }
 
-    // CORRECTED: Run initialization on initial page load AND after every page transition.
-    // 'astro:page-load' is the single, reliable event for this.
     document.addEventListener('astro:page-load', initializeNavbar);
 </script>
