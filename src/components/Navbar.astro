@@ -17,6 +17,7 @@ const currentPath = Astro.url.pathname;
             <a href="/" class="nav-link" class:list={{ active: currentPath === '/' }}>Inicio</a>
             <a href="/trainings" class="nav-link" class:list={{ active: currentPath === '/trainings' }}>Entrenamientos</a>
             <a href="/create-workout" class="nav-link" class:list={{ active: currentPath === '/create-workout' }}>Crear Rutina</a>
+            <a href="/create-exercise" class="nav-link" class:list={{ active: currentPath === '/create-exercise' }}>Crear Ejercicio</a>
             <a href="/history" class="nav-link" class:list={{ active: currentPath === '/history' }}>Historial</a>
             <a id="install-app-link" href="#" class="nav-link" style="display: none;">Instalar App</a>
             <button id="logout-btn" class="nav-link">Cerrar Sesión</button>

@@ -1,0 +1,144 @@
+---
+---
+
+<div class="card">
+  <form id="exercise-form" class="exercise-form">
+    <div class="form-group">
+      <label for="exercise-name">Nombre del Ejercicio</label>
+      <input type="text" id="exercise-name" name="exercise-name" placeholder="Ej: Press de Banca" required>
+    </div>
+    <div class="form-group">
+      <label for="exercise-description">Descripción</label>
+      <textarea id="exercise-description" name="exercise-description" placeholder="Ej: Desarrollo del pectoral mayor..."></textarea>
+    </div>
+
+    <details class="optional-fields">
+      <summary class="optional-fields-summary">Campos Opcionales (Video, Imagen)</summary>
+      <div class="optional-fields-content">
+        <div class="form-group">
+          <label for="exercise-video">Enlace al Video</label>
+          <input type="url" id="exercise-video" name="exercise-video" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
+        <div class="form-group">
+          <label for="exercise-image-input">Imagen del Ejercicio</label>
+          <input type="file" id="exercise-image-input" name="exercise-image" accept="image/jpeg, image/png, image/jpg" class="file-input">
+          <label for="exercise-image-input" class="file-input-label">Seleccionar archivo...</label>
+          <div id="image-preview-container" class="image-preview-container">
+            <img id="image-preview" src="#" alt="Vista previa de la imagen" class="image-preview"/>
+            <span id="image-preview-text">Vista previa</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <button type="submit" class="action-button">Guardar Ejercicio</button>
+    <p id="response-message" class="response-message"></p>
+  </form>
+</div>
+
+<script>
+function initializeExerciseForm() {
+  const form = document.getElementById('exercise-form');
+  if (!form || form.dataset.initialized === 'true') {
+    return;
+  }
+  form.dataset.initialized = 'true';
+
+  const imageInput = document.getElementById('exercise-image-input');
+  const imagePreview = document.getElementById('image-preview');
+  const imagePreviewText = document.getElementById('image-preview-text');
+  const fileInputLabel = form.querySelector('.file-input-label');
+
+  if (imageInput) {
+      imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+            imagePreviewText.style.display = 'none';
+            fileInputLabel.textContent = file.name;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          imagePreview.style.display = 'none';
+          imagePreviewText.style.display = 'block';
+          fileInputLabel.textContent = 'Seleccionar archivo...';
+        }
+      });
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault(); // This is crucial to prevent page reload
+
+    const button = form.querySelector('button[type="submit"]');
+    const responseMessage = document.getElementById('response-message');
+    button.disabled = true;
+    button.textContent = 'Guardando...';
+
+    const formData = new FormData(form);
+    const imageFile = formData.get('exercise-image');
+    let imageUrl = '';
+    if (imageFile && imageFile.size > 0) {
+        imageUrl = `https://firebasestorage.googleapis.com/v0/b/your-project-id.appspot.com/o/exercises%2F${imageFile.name}?alt=media`;
+    }
+
+    const exerciseData = {
+      name: formData.get('exercise-name'),
+      description: formData.get('exercise-description'),
+      videoUrl: formData.get('exercise-video'),
+      imageUrl: imageUrl,
+    };
+
+    try {
+      const response = await fetch('/api/save-exercise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(exerciseData),
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        responseMessage.textContent = '¡Ejercicio guardado con éxito!';
+        responseMessage.className = 'response-message success';
+
+        // Dispatch the event to notify other components (like the modal)
+        document.dispatchEvent(new CustomEvent('exercise-created', { detail: result.data }));
+        
+        form.reset();
+        if(imagePreview) imagePreview.style.display = 'none';
+        if(imagePreviewText) imagePreviewText.style.display = 'block';
+        if(fileInputLabel) fileInputLabel.textContent = 'Seleccionar archivo...';
+
+      } else {
+        responseMessage.textContent = result.message || 'Error al guardar el ejercicio.';
+        responseMessage.className = 'response-message error';
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      responseMessage.textContent = 'Error de red. Inténtalo de nuevo.';
+      responseMessage.className = 'response-message error';
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Guardar Ejercicio';
+    }
+  });
+}
+
+document.addEventListener('astro:page-load', initializeExerciseForm);
+</script>
+
+<style>
+/* Existing styles remain unchanged */
+.card{background:#fff;padding:2.5rem;border-radius:1rem;box-shadow:0 10px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04);border:1px solid #f0f0f0;max-width:100%}.exercise-form{display:flex;flex-direction:column;gap:1.5rem}.form-group{display:flex;flex-direction:column;text-align:left}.form-group label{margin-bottom:.75rem;font-weight:600;font-size:.9rem;color:#374151;text-transform:uppercase;letter-spacing:.05em}.form-group input,.form-group textarea{padding:.8rem 1rem;border:2px solid #e5e7eb;border-radius:.5rem;font-size:1rem;color:#111827;background-color:#f9fafb;transition:border-color .2s,box-shadow .2s}.form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--accent-color,#008080);box-shadow:0 0 0 3px rgba(0,128,128,.2)}.form-group textarea{min-height:120px;resize:vertical}.action-button{background:linear-gradient(45deg,var(--accent-color,#008080),#006666);color:#fff;font-size:1.1rem;font-weight:700;padding:1rem;border:none;border-radius:.5rem;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 4px 15px -5px rgba(0,128,128,.4)}.action-button:hover{transform:translateY(-2px);box-shadow:0 7px 20px -5px rgba(0,128,128,.6)}.action-button:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:none}.response-message{margin-top:.5rem;padding:1rem;border-radius:.5rem;text-align:center;font-weight:600;opacity:0;transition:opacity .3s}.response-message.success{background-color:#d1fae5;color:#065f46;opacity:1}.response-message.error{background-color:#fee2e2;color:#991b1b;opacity:1}.image-preview-container{width:100%;height:200px;border:2px dashed #e5e7eb;border-radius:.5rem;display:flex;justify-content:center;align-items:center;position:relative;background-color:#f9fafb;overflow:hidden;margin-top:1rem}.image-preview{display:none;max-width:100%;max-height:100%;object-fit:cover}.image-preview-text{color:#6b7280;font-weight:500}
+
+/* New styles for optional fields and file input */
+.optional-fields-summary { list-style: none; /* Remove default marker */ display: inline-block; padding: 0.5rem 1rem; margin-bottom: 1rem; background-color: #f3f4f6; color: #4b5563; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s; }.optional-fields-summary:hover { background-color: #e5e7eb; }.optional-fields[open] > .optional-fields-summary { background-color: #e5e7eb; }.optional-fields-content { display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1rem; border-top: 1px solid #f0f0f0; }.optional-fields-summary::-webkit-details-marker { display: none; }
+
+.file-input { width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1; }
+.file-input-label { display: inline-block; padding: 0.8rem 1.2rem; background-color: #fff; color: #374151; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; font-weight: 600; transition: background-color 0.2s, border-color 0.2s; }
+.file-input-label:hover { background-color: #f9fafb; border-color: #d1d5db; }
+
+</style>

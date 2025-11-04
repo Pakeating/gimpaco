@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ExerciseForm from '../components/ExerciseForm.astro';
+---
+
+<Layout title="Crear Nuevo Ejercicio">
+  <main class="container">
+    <header class="page-header">
+      <h1 class="page-title">Crear Nuevo Ejercicio</h1>
+      <p class="page-subtitle">Añade un nuevo ejercicio a tu biblioteca para usarlo en tus rutinas.</p>
+    </header>
+    <ExerciseForm />
+  </main>
+</Layout>
+
+<style>
+  .container {
+    max-width: 56rem; /* 896px */
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+  
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem; /* 40px */
+    font-weight: 700;
+    color: var(--primary-color, #2A2A2A);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-subtitle {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.125rem; /* 18px */
+    color: #6B7280; /* Cool Gray 500 */
+    max-width: 40rem; /* 640px */
+    margin: 0 auto;
+  }
+
+</style>

@@ -1,18 +1,14 @@
 ---
-// This line is crucial! It tells Astro to render this page on the server for each request,
-// instead of trying to build it statically at build time.
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 
-// Get the workout ID from the URL
+// Fetching the specific workout data based on the ID from the URL.
 const { id } = Astro.params;
-
-// Fetch the specific workout data from our API
 const response = await fetch(`${Astro.url.origin}/api/retrieve-workout?id=${id}`);
 const workout = await response.json();
 
-// Handle case where workout is not found
+// Redirect to 404 if the workout isn'''t found.
 if (!workout || response.status === 404) {
   return Astro.redirect('/404');
 }
@@ -20,17 +16,18 @@ if (!workout || response.status === 404) {
 
 <Layout title={`Entrenando: ${workout.name}`}>
   <main class="container">
-    <div class="workout-header" transition:name={`workout-name-${workout.id}`}>
+    <div class="workout-header" transition:name={`workout-name-${workout.workoutId}`}>
       <h1>{workout.name}</h1>
       <p>Concéntrate, mantén la técnica y supera tus límites.</p>
     </div>
 
-    <div class="exercises-container">
+    {/* The main container now holds the workoutId for our script */}
+    <div class="exercises-container" data-workout-id={workout.workoutId}>
       {workout.exercises.map((exercise, index) => (
-        <section class="exercise-card">
+        <section class="exercise-card" data-exercise-id={exercise.exerciseId}>
           <div class="exercise-card-header">
             <span class="exercise-number">{index + 1}</span>
-            <h2>{exercise.name}</h2>
+            <h2 class="exercise-name">{exercise.name}</h2>
           </div>
           <div class="sets-table">
             <div class="table-header">
@@ -38,16 +35,28 @@ if (!workout || response.status === 404) {
               <div class="header-item">Planificado</div>
               <div class="header-item">Realizado</div>
             </div>
+            {/* Mapping over sets and passing planned data as data-* attributes */}
             {exercise.sets.map((set, setIndex) => (
-              <div class="set-row">
+              <div 
+                class="set-row" 
+                data-set-id={set.setId} 
+                data-planned-reps={set.planned.reps} 
+                data-planned-intensity={set.planned.intensity} 
+                data-planned-weight={set.planned.weight}
+              >
                 <div class="set-cell set-number-cell">{setIndex + 1}</div>
                 <div class="set-cell planned-cell">
-                  <span>{set.repetitions} reps</span>
-                  <span>@ {set.intensity}</span>
-                  {set.weight_kg && <span>{set.weight_kg} kg</span>}
+                  {/* Displaying the planned data */}
+                  <span class="planned-reps">{set.planned.reps} reps</span>
+                  <span class="planned-intensity">{set.planned.intensity}</span>
+                  {set.planned.weight != null && <span class="planned-weight">{set.planned.weight} kg</span>}
                 </div>
                 <div class="set-cell performed-cell">
-                  <span>aqui iran los datos del usuario</span>
+                  <div class="input-group">
+                    {/* Inputs for the user to enter their actual performance */}
+                    <input type="number" placeholder="kg" class="performance-input weight-input"/>
+                    <input type="number" placeholder="reps" class="performance-input reps-input"/>
+                  </div>
                 </div>
               </div>
             ))}
@@ -56,163 +65,112 @@ if (!workout || response.status === 404) {
       ))}
     </div>
 
+    <div class="comments-section">
+      <label for="workout-comments">Comentarios del Entrenamiento</label>
+      <textarea id="workout-comments" rows="4" placeholder="Añade tus sensaciones, notas sobre la técnica, fatiga, etc."></textarea>
+    </div>
+
     <div class="finish-workout-section">
-      <button class="finish-btn">Finalizar Entrenamiento</button>
+      <button id="finish-workout-btn" class="finish-btn">Finalizar Entrenamiento</button>
     </div>
   </main>
 </Layout>
 
 <style>
-  /* Styles remain the same as before */
-  .container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-  }
-
-  .workout-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    border-bottom: 2px solid var(--accent-color);
-    padding-bottom: 1.5rem;
-  }
-
-  .workout-header h1 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 2.8rem;
-    color: var(--primary-color);
-    margin: 0;
-  }
-
-  .workout-header p {
-    font-size: 1.125rem;
-    color: #555;
-    margin-top: 0.5rem;
-  }
-
-  .exercises-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .exercise-card {
-    background-color: var(--white-color);
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.07);
-    overflow: hidden;
-  }
-
-  .exercise-card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background-color: #f8f9fa;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #e9ecef;
-  }
-
-  .exercise-number {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--accent-color);
-    color: var(--white-color);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-  }
-
-  .exercise-card-header h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.6rem;
-    margin: 0;
-    color: var(--primary-color);
-  }
-
-  .sets-table {
-    padding: 0.5rem 1.5rem 1.5rem;
-  }
-
-  .table-header, .set-row {
-    display: grid;
-    grid-template-columns: 50px 1.5fr 1fr;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.75rem 0;
-  }
-
-  .table-header {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #6c757d;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #e9ecef;
-  }
-
-  .set-row {
-    border-bottom: 1px solid #f1f3f5;
-  }
-  .set-row:last-child {
-    border-bottom: none;
-  }
-
-  .set-cell {
-    font-size: 1rem;
-    color: #343a40;
-  }
-  
-  .set-number-cell {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-align: center;
-  }
-
-  .planned-cell {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-  }
-  .planned-cell span {
-    background-color: #e9ecef;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-  }
-  
-  .performed-cell {
-    color: #6c757d;
-    font-style: italic;
-  }
-
-  .finish-workout-section {
-    margin-top: 3rem;
-    text-align: center;
-  }
-
-  .finish-btn {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: var(--white-color);
-    background: linear-gradient(45deg, var(--accent-color), #00a0a0);
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 2rem;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2);
-  }
-
-  .finish-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 128, 128, 0.3);
-  }
+  /* Styles remain the same as they are well-structured */
+  .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+  .workout-header { text-align: center; margin-bottom: 3rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1.5rem; }
+  .workout-header h1 { font-family: 'Poppins', sans-serif; font-size: 2.8rem; color: var(--primary-color); margin: 0; }
+  .workout-header p { font-size: 1.125rem; color: #555; margin-top: 0.5rem; }
+  .exercises-container { display: flex; flex-direction: column; gap: 2.5rem; }
+  .exercise-card { background-color: var(--white-color); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.07); overflow: hidden; }
+  .exercise-card-header { display: flex; align-items: center; gap: 1rem; background-color: #f8f9fa; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e9ecef; }
+  .exercise-number { display: flex; justify-content: center; align-items: center; width: 36px; height: 36px; border-radius: 50%; background-color: var(--accent-color); color: var(--white-color); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
+  .exercise-card-header h2 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; margin: 0; color: var(--primary-color); }
+  .sets-table { padding: 0.5rem 1.5rem 1.5rem; }
+  .table-header, .set-row { display: grid; grid-template-columns: 50px 1.5fr 1.5fr; gap: 1rem; align-items: center; padding: 0.75rem 0; }
+  .table-header { font-family: 'Poppins', sans-serif; font-weight: 600; color: #6c757d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e9ecef; }
+  .set-row { border-bottom: 1px solid #f1f3f5; }
+  .set-row:last-child { border-bottom: none; }
+  .set-cell { font-size: 1rem; color: #343a40; }
+  .set-number-cell { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem; text-align: center; }
+  .planned-cell { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+  .planned-cell span { background-color: #e9ecef; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.95rem; }
+  .performed-cell { display: flex; align-items: center; }
+  .input-group { display: flex; align-items: center; gap: 0.5rem; }
+  .performance-input { width: 70px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1rem; font-family: 'Lato', sans-serif; background-color: #f8f9fa; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .performance-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2); background-color: var(--white-color); }
+  .comments-section { margin-top: 3rem; }
+  .comments-section label { display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.2rem; color: var(--primary-color); margin-bottom: 0.75rem; }
+  .comments-section textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 1rem; resize: vertical; min-height: 100px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .comments-section textarea:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2); }
+  .finish-workout-section { margin-top: 3rem; text-align: center; }
+  .finish-btn { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--white-color); background: linear-gradient(45deg, var(--accent-color), #00a0a0); border: none; border-radius: 8px; padding: 0.8rem 2rem; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2); }
+  .finish-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 128, 128, 0.3); }
 </style>
+
+<script>
+  function initializeWorkoutLogger() {
+    const finishButton = document.getElementById('finish-workout-btn');
+    if (!finishButton) return;
+
+    finishButton.addEventListener('click', () => {
+      const workoutContainer = document.querySelector('.exercises-container');
+      const workoutId = workoutContainer.dataset.workoutId;
+
+      const completedWorkout = {
+        workoutId: workoutId,
+        completedAt: new Date().toISOString(),
+        exercises: [],
+        comments: document.getElementById('workout-comments').value
+      };
+
+      document.querySelectorAll('.exercise-card').forEach(exerciseCard => {
+        const exerciseData = {
+          exerciseId: exerciseCard.dataset.exerciseId,
+          name: exerciseCard.querySelector('.exercise-name').textContent.trim(),
+          sets: []
+        };
+
+        exerciseCard.querySelectorAll('.set-row').forEach(setRow => {
+          const weightInput = setRow.querySelector('.weight-input');
+          const repsInput = setRow.querySelector('.reps-input');
+          
+          // The clean way: Reading planned data directly from data attributes.
+          const setData = {
+            setId: parseInt(setRow.dataset.setId, 10),
+            planned: {
+              reps: parseInt(setRow.dataset.plannedRps, 10),
+              intensity: setRow.dataset.plannedIntensity,
+              weight: parseFloat(setRow.dataset.plannedWeight)
+            },
+            // Reading the actual performed values from the inputs.
+            performed: {
+              weight: weightInput.value ? parseFloat(weightInput.value) : null,
+              reps: repsInput.value ? parseInt(repsInput.value, 10) : null
+            }
+          };
+
+          // Only add the set if some performance data was entered.
+          if (setData.performed.weight !== null || setData.performed.reps !== null) {
+            exerciseData.sets.push(setData);
+          }
+        });
+
+        // Only add the exercise if at least one set was performed.
+        if (exerciseData.sets.length > 0) {
+          completedWorkout.exercises.push(exerciseData);
+        }
+      });
+
+      console.log('Workout Data Collected:');
+      console.log(JSON.stringify(completedWorkout, null, 2));
+      
+      // In a real scenario, this is where you would POST the data to an endpoint.
+      // For example: await fetch('/api/log-workout', { ... });
+      alert('¡Entrenamiento finalizado! Revisa la consola para ver los datos capturados.');
+    });
+  }
+
+  document.addEventListener('astro:page-load', initializeWorkoutLogger);
+</script>
