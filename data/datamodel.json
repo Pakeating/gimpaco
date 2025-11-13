@@ -1,60 +1,125 @@
 {
   "trainings": [
     {
-      "id": "training-01",
-      "name": "Día de Fuerza - Pierna",
+      "workoutId": "training-01",
+      "completedAt": "2025-10-29T12:16:35.982Z",
       "exercises": [
         {
-          "id": "ex-01-01",
-          "name": "Sentadillas",
-          "sets": [
-            { "id": "set-01-01-01", "repetitions": 5, "intensity": 85, "weight": 100 },
-            { "id": "set-01-01-02", "repetitions": 5, "intensity": 85, "weight": 100 },
-            { "id": "set-01-01-03", "repetitions": 5, "intensity": 85, "weight": 100 }
-          ]
-        },
-        {
-          "id": "ex-01-02",
-          "name": "Prensa de Piernas",
-          "sets": [
-            { "id": "set-01-02-01", "repetitions": 10, "intensity": 80, "weight": 150 },
-            { "id": "set-01-02-02", "repetitions": 10, "intensity": 80, "weight": 150 },
-            { "id": "set-01-02-03", "repetitions": 10, "intensity": 80, "weight": 150 }
-          ]
-        },
-        {
-          "id": "ex-01-03",
-          "name": "Extensiones de Cuádriceps",
-          "sets": [
-            { "id": "set-01-03-01", "repetitions": 12, "intensity": 75, "weight": 40 },
-            { "id": "set-01-03-02", "repetitions": 12, "intensity": 75, "weight": 40 }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "training-02",
-      "name": "Día de Empuje - Pecho y Hombros",
-      "exercises": [
-        {
-          "id": "ex-02-01",
+          "exerciseId": "ex-01-01",
           "name": "Press de Banca",
           "sets": [
-            { "id": "set-02-01-01", "repetitions": 8, "intensity": 80, "weight": 80 },
-            { "id": "set-02-01-02", "repetitions": 8, "intensity": 80, "weight": 80 },
-            { "id": "set-02-01-03", "repetitions": 8, "intensity": 80, "weight": 80 }
+            {
+              "setId": "set-01-01-01",
+              "planned": {
+                "reps": 5,
+                "intensity": "RPE 7",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 345,
+                "reps": 4
+              }
+            },
+            {
+              "setId": "set-01-01-02",
+              "planned": {
+                "reps": 5,
+                "intensity": "RPE 8",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 34,
+                "reps": 4
+              }
+            },
+            {
+              "setId": "set-01-01-03",
+              "planned": {
+                "reps": 5,
+                "intensity": "RPE 9",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 2,
+                "reps": 6
+              }
+            }
           ]
         },
         {
-          "id": "ex-02-02",
-          "name": "Press Militar",
+          "exerciseId": "ex-01-02",
+          "name": "Fondos en Paralelas",
           "sets": [
-            { "id": "set-02-02-01", "repetitions": 10, "intensity": 75, "weight": 40 },
-            { "id": "set-02-02-02", "repetitions": 10, "intensity": 75, "weight": 40 },
-            { "id": "set-02-02-03", "repetitions": 10, "intensity": 75, "weight": 40 }
+            {
+              "setId": "set-01-02-01",
+              "planned": {
+                "reps": 10,
+                "intensity": "RIR 2",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 13,
+                "reps": 12
+              }
+            },
+            {
+              "setId": "set-01-02-02",
+              "planned": {
+                "reps": 10,
+                "intensity": "RIR 1",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 123,
+                "reps": 11
+              }
+            },
+            {
+              "setId": "set-01-02-03",
+              "planned": {
+                "reps": 10,
+                "intensity": "RIR 0",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 123,
+                "reps": 12
+              }
+            }
+          ]
+        },
+        {
+          "exerciseId": "ex-01-03",
+          "name": "Press Francés con Mancuernas",
+          "sets": [
+            {
+              "setId": "set-01-03-01",
+              "planned": {
+                "reps": 12,
+                "intensity": "70%",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 12,
+                "reps": 12
+              }
+            },
+            {
+              "setId": "set-01-03-02",
+              "planned": {
+                "reps": 12,
+                "intensity": "70%",
+                "weight": 0
+              },
+              "performed": {
+                "weight": 12,
+                "reps": 12
+              }
+            }
           ]
         }
-      ]
+      ],
+      "comments": "pruebas varias"
     }
   ]
 }

@@ -1,53 +1,28 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import WorkoutHistoryItem from '../components/WorkoutHistoryItem.astro';
-
-// Simulación de datos del historial
-const workoutHistory = [
-  {
-    id: 'workout-1',
-    date: '2024-07-28',
-    name: 'Lunes - Pecho y Tríceps',
-    exercises: [
-      { name: 'Press de Banca', sets: 4, reps: 8, weight: 80 },
-      { name: 'Aperturas con Mancuernas', sets: 3, reps: 12, weight: 20 },
-      { name: 'Fondos en Paralelas', sets: 3, reps: 10, weight: 0 },
-    ]
-  },
-  {
-    id: 'workout-2',
-    date: '2024-07-26',
-    name: 'Viernes - Pierna',
-    exercises: [
-      { name: 'Sentadillas', sets: 5, reps: 5, weight: 120 },
-      { name: 'Prensa de Piernas', sets: 4, reps: 10, weight: 180 },
-      { name: 'Extensiones de Cuádriceps', sets: 3, reps: 15, weight: 60 },
-    ]
-  },
-  {
-    id: 'workout-3',
-    date: '2024-07-24',
-    name: 'Miércoles - Espalda y Bíceps',
-    exercises: [
-      { name: 'Dominadas', sets: 4, reps: 8, weight: 0 },
-      { name: 'Remo con Barra', sets: 4, reps: 8, weight: 70 },
-      { name: 'Curl de Bíceps', sets: 3, reps: 12, weight: 15 },
-    ]
-  }
-];
+// Importamos el componente para que Astro conozca sus estilos.
+import WorkoutHistoryItem from '../components/WorkoutHistoryItem.astro'; 
 ---
 
 <Layout>
+  {/* 
+    Incluimos una instancia del componente con display: none. 
+    Esto es un truco para forzar a Astro a empaquetar los estilos de WorkoutHistoryItem.astro 
+    en el CSS de esta página, haciéndolos disponibles para el contenido generado por el script.
+    No se le pasa ningún dato porque no necesita renderizar nada visible.
+  */}
+  <div style="display: none;">
+    <WorkoutHistoryItem />
+  </div>
+
   <div class="history-container">
     <header class="history-header">
       <h1>Historial de Entrenamientos</h1>
       <p>Consulta tus sesiones pasadas para ver tu progreso a lo largo del tiempo.</p>
     </header>
 
-    <div class="history-list">
-      {workoutHistory.map(workout => (
-        <WorkoutHistoryItem workout={workout} />
-      ))}
+    <div id="history-list-container" class="history-list">
+      <p class="loading-message">Cargando historial...</p>
     </div>
   </div>
 </Layout>
@@ -84,4 +59,73 @@ const workoutHistory = [
     flex-direction: column;
     gap: 1.5rem;
   }
+
+  .loading-message {
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+    padding: 2rem;
+  }
 </style>
+
+<script>
+  // Helper para formatear la fecha
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(dateString + 'T00:00:00'); // Corregir desfase de zona horaria
+    return date.toLocaleDateString('es-ES', options);
+  }
+
+  // Helper para crear el HTML de una tarjeta de historial
+  function createWorkoutCardHTML(workout) {
+    const exercisesHTML = workout.exercises.map(ex => `
+      <li class="exercise-item">
+        <span class="exercise-name">${ex.name}</span>
+        <span class="exercise-details">${ex.sets} series de ${ex.reps} reps con ${ex.weight}kg</span>
+      </li>
+    `).join('');
+
+    return `
+      <div class="history-card">
+        <div class="card-header">
+          <span class="workout-date">${formatDate(workout.date)}</span>
+          <h2 class="workout-name">${workout.name}</h2>
+        </div>
+        <div class="card-body">
+          <h3 class="exercises-title">Ejercicios Realizados</h3>
+          <ul class="exercises-list">${exercisesHTML}</ul>
+        </div>
+      </div>
+    `;
+  }
+
+  // Función principal para buscar y renderizar los datos
+  async function fetchAndRenderHistory() {
+    const container = document.getElementById('history-list-container');
+    if (!container) return;
+
+    container.innerHTML = '<p class="loading-message">Cargando historial...</p>';
+
+    try {
+      const response = await fetch('/api/history');
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const workoutHistory = await response.json();
+
+      if (workoutHistory && workoutHistory.length > 0) {
+        container.innerHTML = workoutHistory.map(createWorkoutCardHTML).join('');
+      } else {
+        container.innerHTML = '<p class="loading-message">No hay historial de entrenamientos para mostrar.</p>';
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+      container.innerHTML = '<p class="loading-message" style="color: red;">Error al cargar el historial.</p>';
+    }
+  }
+
+  // Patrón correcto para View Transitions
+  document.addEventListener('astro:after-swap', fetchAndRenderHistory);
+  fetchAndRenderHistory(); // Ejecutar en la carga inicial
+</script>

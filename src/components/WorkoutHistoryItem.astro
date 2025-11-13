@@ -1,32 +1,20 @@
 ---
-const { workout } = Astro.props;
-
-// Función para formatear la fecha de una manera más legible
-function formatDate(dateString) {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('es-ES', options);
-}
+// Este componente ya no renderiza props directamente,
+// pero sus estilos son necesarios en la página del historial.
+// Lo mantenemos para que Astro pueda empaquetar sus estilos.
 ---
 
-<div class="history-card">
-  <div class="card-header">
-    <span class="workout-date">{formatDate(workout.date)}</span>
-    <h2 class="workout-name">{workout.name}</h2>
-  </div>
-  <div class="card-body">
-    <h3 class="exercises-title">Ejercicios Realizados</h3>
-    <ul class="exercises-list">
-      {workout.exercises.map(ex => (
-        <li class="exercise-item">
-          <span class="exercise-name">{ex.name}</span>
-          <span class="exercise-details">{ex.sets} series de {ex.reps} reps con {ex.weight}kg</span>
-        </li>
-      ))}
-    </ul>
-  </div>
-</div>
+<!-- 
+  Este componente ahora puede estar vacío o simplemente servir como un placeholder.
+  Su propósito principal en la página de historial es que Astro
+  incluya sus estilos (<style>) en la hoja de estilos final.
+-->
 
-<style>
+<style is:global>
+  /* 
+    Estos estilos ahora son globales (no encapsulados) para que puedan aplicarse
+    al HTML que se genera dinámicamente en el lado del cliente. 
+  */
   .history-card {
     background-color: var(--white-color);
     border-radius: 0.75rem;
@@ -109,5 +97,4 @@ function formatDate(dateString) {
     color: var(--primary-color);
     opacity: 0.9;
   }
-
 </style>

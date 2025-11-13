@@ -1,20 +1,7 @@
----
-// Simulamos una llamada asíncrona al backend para obtener los datos.
-async function getPendingWorkoutCount() {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return 2;
-}
-
-const count = await getPendingWorkoutCount();
----
-
-{count > 0 &&
-  <div class="pending-badge">
-    <span class="text">Tienes </span>
-    <span class="count">{count}</span>
-    <span class="text"> pendiente{count > 1 ? 's' : ''}</span>
-  </div>
-}
+<div id="pending-badge" class="pending-badge">
+  <span id="workout-count" class="count"></span>
+  <span id="workout-text" class="text"></span>
+</div>
 
 <style>
   .pending-badge {
@@ -22,7 +9,6 @@ const count = await getPendingWorkoutCount();
     top: -17px; 
     left: 1.5rem;
     z-index: 10;
-
     background-image: linear-gradient(45deg, var(--accent-color), #ffc107);
     color: var(--primary-color);
     font-family: 'Poppins', sans-serif;
@@ -34,6 +20,16 @@ const count = await getPendingWorkoutCount();
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    visibility: hidden;
+  }
+
+  .pending-badge.visible {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
   }
 
   .count {
@@ -41,3 +37,38 @@ const count = await getPendingWorkoutCount();
     font-weight: 700;
   }
 </style>
+
+<script>
+  // Esta función contiene la lógica para buscar los datos y actualizar el DOM.
+  async function run() {
+    const badge = document.getElementById('pending-badge');
+    const countElement = document.getElementById('workout-count');
+    const textElement = document.getElementById('workout-text');
+
+    if (!badge || !countElement || !textElement) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/retrieve-workout', { method: 'POST' });
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const count = data.count;
+
+      if (count > 0) {
+        countElement.textContent = count;
+        textElement.textContent = ` entrenamiento${count > 1 ? 's' : ''} disponible${count > 1 ? 's' : ''}`;
+        badge.classList.add('visible');
+      } else {
+        // Si no hay entrenamientos, nos aseguramos de que esté oculto.
+        badge.classList.remove('visible');
+      }
+    } catch (error) {
+      badge.classList.remove('visible');
+    }
+  }
+  run();
+  //Ejecutamos la función de nuevo después de cada transición de vista.
+  document.addEventListener('astro:after-swap', run);
+</script>

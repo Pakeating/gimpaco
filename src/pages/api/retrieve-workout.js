@@ -100,3 +100,18 @@ export async function GET({ request }) {
     });
   }
 }
+
+/**
+ * Maneja las peticiones POST para obtener el número de entrenamientos.
+ * Por ahora, devuelve un número fijo.
+ */
+export async function POST({ request }) {
+  const workoutCount = 3; // Número hardcodeado
+
+  return new Response(JSON.stringify({ count: workoutCount }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+}

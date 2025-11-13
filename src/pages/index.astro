@@ -12,7 +12,7 @@ import Logo from '../components/Logo.astro';
     </header>
 
     <main class="action-cards">
-      <a href="/workout" class="card begin-workout">
+      <a href="/train-page" class="card begin-workout">
         <div class="card-content">
           <PendingWorkout />
           <h2 class="workout-title">Comenzar Entrenamiento</h2>
@@ -35,7 +35,6 @@ import Logo from '../components/Logo.astro';
   .welcome-container {
     max-width: 64rem;
     margin: 4rem auto;
-    /* CORRECTED: Removed horizontal padding to fix mobile navbar overflow */
     padding: 2rem 0;
     text-align: center;
   }
@@ -55,7 +54,6 @@ import Logo from '../components/Logo.astro';
     opacity: 0.9;
     max-width: 40rem;
     margin: 0 auto 3rem auto;
-    /* Added padding for mobile view to compensate for the container's change */
     padding: 0 1rem;
   }
 
@@ -63,14 +61,12 @@ import Logo from '../components/Logo.astro';
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-    /* Added padding for mobile view */
     padding: 0 1rem;
   }
 
   @media (min-width: 768px) {
     .action-cards {
       grid-template-columns: repeat(2, 1fr);
-      /* Reset padding for desktop */
       padding: 0;
     }
     .welcome-header p {

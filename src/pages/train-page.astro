@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TrainComponent from '../components/TrainComponent.astro';
+---
+
+<Layout title="Entrenamiento - Gimpaco">
+  <main class="train-page-main">
+    <TrainComponent />
+  </main>
+</Layout>
+
+<style>
+  .train-page-main {
+    padding: 2rem 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .train-page-main {
+      padding: 1.5rem 0.5rem;
+    }
+  }
+</style>
