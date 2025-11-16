@@ -7,10 +7,12 @@
 </div>
 
 <style is:global>
-  /* Styles inherited and adapted from [id].astro, now global for client-side rendering */
+  html {
+    scroll-padding-top: 2rem; /* Ensures a margin when scrolling to an element */
+  }
+
   .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
-  .loading-panel { text-align: center; padding: 4rem 1rem; }
-  .error-panel { text-align: center; padding: 4rem 1rem; }
+  .loading-panel, .error-panel { text-align: center; padding: 4rem 1rem; }
   .error-panel h2 { font-family: 'Poppins', sans-serif; color: var(--danger-color); }
 
   .workout-header { text-align: center; margin-bottom: 3rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1.5rem; }
@@ -19,46 +21,127 @@
 
   .exercises-container { display: flex; flex-direction: column; gap: 2.5rem; }
   .exercise-card { background-color: var(--white-color); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.07); overflow: hidden; }
-  .exercise-card-header { display: flex; align-items: center; gap: 1rem; background-color: #f8f9fa; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e9ecef; }
-  .exercise-number { display: flex; justify-content: center; align-items: center; width: 36px; height: 36px; border-radius: 50%; background-color: var(--accent-color); color: var(--white-color); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
-  .exercise-card-header h2 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; margin: 0; color: var(--primary-color); }
   
-  .sets-table { padding: 0.5rem 1.5rem 1.5rem; }
+  .exercise-card-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; background-color: #f8f9fa; padding: 1rem 1.5rem; border-bottom: 1px solid #e9ecef; cursor: pointer; }
+  .exercise-card-header-main { display: flex; align-items: center; gap: 1rem; }
+  .exercise-number { display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; border-radius: 50%; background-color: var(--accent-color); color: var(--white-color); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+  .exercise-card-header h2 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; margin: 0; color: var(--primary-color); }
+
+  .collapse-icon { transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1); }
+  .exercise-card.collapsed .collapse-icon { transform: rotate(-90deg); }
+
+  .collapsible-content { max-height: 1500px; transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding-top 0.25s ease, padding-bottom 0.25s ease; overflow: hidden;}
+  .exercise-card.collapsed .collapsible-content { max-height: 0; padding-top: 0; padding-bottom: 0; }
+
+  .sets-table { padding: 1rem 1.5rem 1.5rem; }
   .table-header, .set-row { display: grid; grid-template-columns: 50px 1.5fr 1.5fr; gap: 1rem; align-items: center; padding: 0.75rem 0; }
   .table-header { font-family: 'Poppins', sans-serif; font-weight: 600; color: #6c757d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e9ecef; }
   
-  .set-row { border-bottom: 1px solid #f1f3f5; transition: background-color 0.3s ease; }
+  .set-row { border-bottom: 1px solid #f1f3f5; }
   .set-row:last-child { border-bottom: none; }
-  .set-row.completed { background-color: #f0fff0; /* Light green for completed sets */ }
+  .set-row.completed { background-color: #f0fff0; }
 
   .set-cell { font-size: 1rem; color: #343a40; }
-  .set-number-cell { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem; text-align: center; }
+  .set-number-cell { font-weight: 600; text-align: center; }
   .planned-cell { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
   .planned-cell span { background-color: #e9ecef; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.95rem; }
   
   .performed-cell { display: flex; align-items: center; }
   .input-group { display: flex; align-items: center; gap: 0.5rem; }
-  .performance-input { width: 70px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1rem; font-family: 'Lato', sans-serif; background-color: #f8f9fa; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  .performance-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2); background-color: var(--white-color); }
+  .performance-input { width: 70px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1rem; background-color: #f8f9fa; }
 
-  .comments-section { margin-top: 3rem; }
-  .comments-section label { display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.2rem; color: var(--primary-color); margin-bottom: 0.75rem; }
-  .comments-section textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 1rem; resize: vertical; min-height: 100px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  .comments-section textarea:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2); }
+  .exercise-actions { padding: 0 1.5rem 1.5rem; text-align: center; }
+  .exercise-done-btn { background-color: var(--accent-color); color: var(--white-color); border: none; border-radius: 6px; padding: 0.5rem 1.25rem; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s; }
+  .exercise-done-btn:hover { background-color: #006666; }
   
-  .finish-workout-section { margin-top: 3rem; text-align: center; }
-  .finish-btn { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--white-color); background: linear-gradient(45deg, var(--accent-color), #00a0a0); border: none; border-radius: 8px; padding: 0.8rem 2rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2); }
-  .finish-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 128, 128, 0.3); }
-  .finish-btn:disabled { background: #999; cursor: not-allowed; transform: none; box-shadow: none; }
-  .finish-btn.saved { background: linear-gradient(45deg, var(--success-color), #16a34a); }
-  .finish-btn.error { background: linear-gradient(45deg, var(--danger-color), #dc2626); }
+  .comments-section {
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+  }
+  .comments-section label {
+    display: block;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  #workout-comments {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    background-color: #f8f9fa;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #workout-comments:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2);
+  }
+
+  .finish-workout-section {
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .finish-btn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .finish-btn:hover {
+    background-color: #222;
+    transform: translateY(-2px);
+  }
+
+  .finish-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .finish-btn.saved {
+    background-color: #28a745;
+  }
+
+  .finish-btn.error {
+    background-color: var(--danger-color);
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 0; }
+    .exercises-container { gap: 0; }
+    .exercise-card { border-radius: 0; box-shadow: none; border-bottom: 8px solid #f0f0f0; }
+    .exercise-card:last-child { border-bottom: none; }
+    .exercise-card-header, .sets-table, .exercise-actions { padding-left: 1rem; padding-right: 1rem; }
+    .table-header, .set-row { grid-template-columns: 35px 1fr 1.2fr; gap: 0.5rem; }
+    .planned-cell span { font-size: 0.8rem; }
+    .input-group { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+    .performance-input { width: 100%; }
+    .comments-section, .finish-workout-section { padding: 1.5rem; }
+  }
 </style>
 
 <script>
-function initializeTrainComponent() {
+document.addEventListener('astro:page-load', main);
+
+function main() {
   const container = document.getElementById('train-component-container');
-  if (!container || container.dataset.initialized) return;
-  container.dataset.initialized = 'true';
+  if (!container) return;
 
   let workoutData = null;
 
@@ -68,39 +151,46 @@ function initializeTrainComponent() {
 
   const renderWorkout = (workout) => {
     workoutData = workout;
-    const exercisesHtml = workout.exercises.map((exercise, index) => `
-      <section class="exercise-card" data-exercise-id="${exercise.exerciseId}">
-        <div class="exercise-card-header">
-          <span class="exercise-number">${index + 1}</span>
-          <h2 class="exercise-name">${exercise.name}</h2>
-        </div>
-        <div class="sets-table">
-          <div class="table-header">
-            <div class="header-item">Set</div>
-            <div class="header-item">Planificado</div>
-            <div class="header-item">Realizado</div>
-          </div>
-          ${exercise.sets.map((set, setIndex) => `
-            <div class="set-row" data-set-id="${set.setId}">
-              <div class="set-cell set-number-cell">${setIndex + 1}</div>
-              <div class="set-cell planned-cell">
-                <span class="planned-reps">${set.planned.reps} reps</span>
-                <span class="planned-intensity">@ ${set.planned.intensity}</span>
-                ${set.planned.weight > 0 ? `<span class="planned-weight">${set.planned.weight} kg</span>` : ''}
-              </div>
-              <div class="set-cell performed-cell">
-                <div class="input-group">
-                  <input type="number" placeholder="kg" class="performance-input weight-input" data-field="weight" data-exercise-id="${exercise.exerciseId}" data-set-id="${set.setId}" />
-                  <input type="number" placeholder="reps" class="performance-input reps-input" data-field="reps" data-exercise-id="${exercise.exerciseId}" data-set-id="${set.setId}" />
-                </div>
-              </div>
+    const exercisesHtml = workout.exercises.map((exercise, index) => {
+      const isCollapsed = index > 0 ? 'collapsed' : '';
+      return `
+        <section class="exercise-card ${isCollapsed}" data-exercise-id="${exercise.exerciseId}">
+          <div class="exercise-card-header">
+            <div class="exercise-card-header-main">
+              <span class="exercise-number">${index + 1}</span>
+              <h2 class="exercise-name">${exercise.name}</h2>
             </div>
-          `).join('')}
-        </div>
-      </section>
-    `).join('');
+            <div class="collapse-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="collapsible-content">
+            <div class="sets-table">
+              <div class="table-header"><div>Set</div><div>Planificado</div><div>Realizado</div></div>
+              ${exercise.sets.map((set, setIndex) => `
+                <div class="set-row" data-set-id="${set.setId}">
+                  <div class="set-cell set-number-cell">${setIndex + 1}</div>
+                  <div class="set-cell planned-cell">
+                    <span>${set.planned.reps} reps</span>
+                    <span>@ ${set.planned.intensity}</span>
+                    ${set.planned.weight > 0 ? `<span>${set.planned.weight} kg</span>` : ''}
+                  </div>
+                  <div class="set-cell performed-cell">
+                    <div class="input-group">
+                      <input type="number" placeholder="kg" class="performance-input weight-input" data-field="weight" data-exercise-id="${exercise.exerciseId}" data-set-id="${set.setId}" />
+                      <input type="number" placeholder="reps" class="performance-input reps-input" data-field="reps" data-exercise-id="${exercise.exerciseId}" data-set-id="${set.setId}" />
+                    </div>
+                  </div>
+                </div>`).join('')}
+            </div>
+            <div class="exercise-actions">
+              <button class="exercise-done-btn">¡Hecho!</button>
+            </div>
+          </div>
+        </section>`;
+    }).join('');
 
-    const workoutHtml = `
+    const fullHtml = `
       <main class="container">
         <div class="workout-header">
           <h1>${workout.name}</h1>
@@ -109,14 +199,13 @@ function initializeTrainComponent() {
         <div class="exercises-container" data-workout-id="${workout.workoutId}">${exercisesHtml}</div>
         <div class="comments-section">
           <label for="workout-comments">Comentarios del Entrenamiento</label>
-          <textarea id="workout-comments" rows="4" placeholder="Añade tus sensaciones, notas sobre la técnica, fatiga, etc."></textarea>
+          <textarea id="workout-comments" rows="4" placeholder="Añade tus sensaciones, notas, etc."></textarea>
         </div>
         <div class="finish-workout-section">
           <button id="finish-workout-btn" class="finish-btn">Finalizar Entrenamiento</button>
         </div>
-      </main>
-    `;
-    container.innerHTML = workoutHtml;
+      </main>`;
+    container.innerHTML = fullHtml;
     addEventListeners();
   };
 
@@ -125,18 +214,20 @@ function initializeTrainComponent() {
     if (!exercise) return;
     const set = exercise.sets.find(s => s.setId == setId);
     if (!set) return;
+    set.performed = set.performed || {};
     set.performed[field] = value === '' ? null : Number(value);
 
     const setRow = container.querySelector(`.set-row[data-set-id="${setId}"]`);
-    if (set.performed.reps !== null && set.performed.weight !== null) {
+    if (setRow && set.performed.reps != null && set.performed.weight != null) {
       setRow.classList.add('completed');
-    } else {
+    } else if (setRow) {
       setRow.classList.remove('completed');
     }
   };
 
   const saveWorkout = async () => {
     const button = document.getElementById('finish-workout-btn');
+    if (!button) return;
     button.disabled = true;
     button.textContent = 'Guardando...';
 
@@ -157,24 +248,65 @@ function initializeTrainComponent() {
       button.textContent = 'Error al Guardar';
       button.classList.add('error');
       setTimeout(() => {
-          button.disabled = false;
-          button.textContent = 'Finalizar Entrenamiento';
-          button.classList.remove('error');
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Finalizar Entrenamiento';
+            button.classList.remove('error');
+          }
       }, 3000);
     }
   };
 
   const addEventListeners = () => {
+    const scrollAndFocus = (card) => {
+      const content = card.querySelector('.collapsible-content');
+      if (content) {
+        content.addEventListener('transitionend', () => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, { once: true });
+      }
+    };
+
+    container.querySelectorAll('.exercise-card-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const clickedCard = header.closest('.exercise-card');
+        const isOpening = clickedCard.classList.contains('collapsed');
+        
+        container.querySelectorAll('.exercise-card').forEach(card => card.classList.add('collapsed'));
+        
+        if (isOpening) {
+          clickedCard.classList.remove('collapsed');
+          scrollAndFocus(clickedCard);
+        }
+      });
+    });
+
+    container.querySelectorAll('.exercise-done-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentCard = button.closest('.exercise-card');
+        currentCard.classList.add('collapsed');
+        const nextCard = currentCard.nextElementSibling;
+        if (nextCard?.classList.contains('exercise-card')) {
+          nextCard.classList.remove('collapsed');
+          scrollAndFocus(nextCard);
+        }
+      });
+    });
+
     container.querySelectorAll('.performance-input').forEach(input => {
       input.addEventListener('input', (e) => {
         const { exerciseId, setId, field } = e.target.dataset;
         updateSetData(exerciseId, setId, field, e.target.value);
       });
     });
-    document.getElementById('finish-workout-btn').addEventListener('click', saveWorkout);
+
+    const finishBtn = document.getElementById('finish-workout-btn');
+    if(finishBtn) finishBtn.addEventListener('click', saveWorkout);
   };
 
-  const fetchWorkout = async () => {
+  const fetchAndRender = async () => {
+    container.innerHTML = `<div class="loading-panel"><p>Cargando tu entrenamiento...</p></div>`;
     try {
       const response = await fetch('/api/training');
       if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
@@ -186,8 +318,6 @@ function initializeTrainComponent() {
     }
   };
 
-  fetchWorkout();
+  fetchAndRender();
 }
-
-document.addEventListener('astro:page-load', initializeTrainComponent);
 </script>
